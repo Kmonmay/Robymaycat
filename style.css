@@ -1,0 +1,87 @@
+body {
+  margin: 0;
+  font-family: "Comic Neue", cursive;
+  background: linear-gradient(to bottom, #e6f7ff, #ffffff);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+header {
+  text-align: center;
+  margin-top: 30px;
+}
+
+h1 {
+  color: #4da6ff;
+  font-size: 2.5rem;
+}
+
+p {
+  color: #555;
+}
+
+.draw-area {
+  margin-top: 20px;
+  text-align: center;
+}
+
+canvas {
+  border: 3px dashed #99ccff;
+  border-radius: 20px;
+  background-color: #f9fcff;
+  cursor: crosshair;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.buttons {
+  margin-top: 15px;
+}
+
+button {
+  background-color: #cce6ff;
+  border: none;
+  border-radius: 15px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin: 0 8px;
+  transition: 0.3s;
+}
+
+button:hover {
+  background-color: #99d6ff;
+}
+
+.cat-area {
+  margin-top: 40px;
+  position: relative;
+}
+
+#cat {
+  width: 150px;
+  transition: transform 0.6s ease;
+}
+
+.fish {
+  position: absolute;
+  width: 40px;
+  left: 50%;
+  bottom: 120px;
+  transform: translateX(-50%);
+  animation: swim 2s linear forwards;
+}
+
+@keyframes swim {
+  0% { bottom: 120px; opacity: 1; }
+  100% { bottom: 250px; opacity: 0; }
+}
+
+footer {
+  margin: 30px 0;
+  font-size: 0.9rem;
+  color: #888;
+}
