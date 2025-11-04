@@ -79,8 +79,10 @@ document.getElementById('feedBtn').addEventListener('click', async () => {
 // 🧠 ตรวจว่าเป็นปลาไหม (ใช้ Hugging Face API)
 async function checkIfFish(imageData) {
   const API_URL = "https://api-inference.huggingface.co/models/cafeai/sketch-image-classification";
-  const TOKEN = "hf_your_api_token_here"; // ใช้ token เดิมได้เลย
+  const TOKEN = "hf_your_api_token_here"; // ใช้ token ของเธอที่ได้จาก Hugging Face
 
+  // 🧠 ขั้นตอนที่ 1: ส่งให้ AI ตรวจ
+  let isAIThinkFish = false;
   try {
     const res = await fetch(API_URL, {
       method: "POST",
@@ -92,22 +94,60 @@ async function checkIfFish(imageData) {
     });
 
     const data = await res.json();
-
-    // หา label ที่เป็น fish หรือ aquatic
     const predictions = data[0];
     const fishLike = predictions.find(p =>
       p.label.toLowerCase().includes("fish") ||
       p.label.toLowerCase().includes("aquatic")
     );
 
-    // ต้องมั่นใจอย่างน้อย 0.5 ขึ้นไปถึงจะผ่าน
-    return fishLike && fishLike.score > 0.5;
+    if (fishLike && fishLike.score > 0.5) {
+      isAIThinkFish = true;
+    }
   } catch (e) {
     console.error("AI check failed:", e);
-    return true; // ถ้าเชื่อมต่อไม่ได้ ให้ผ่านไปก่อน
   }
-}
 
+  // 🧮 ขั้นตอนที่ 2: ตรวจลักษณะรูปทรงพื้นฐาน
+  const img = new Image();
+  img.src = imageData;
+  await new Promise(r => img.onload = r);
+
+  const tempCanvas = document.createElement('canvas');
+  const tctx = tempCanvas.getContext('2d');
+  tempCanvas.width = img.width;
+  tempCanvas.height = img.height;
+  tctx.drawImage(img, 0, 0);
+
+  const imgData = tctx.getImageData(0, 0, img.width, img.height);
+  let pixelCount = 0;
+  let minX = img.width, maxX = 0, minY = img.height, maxY = 0;
+
+  for (let i = 0; i < imgData.data.length; i += 4) {
+    const alpha = imgData.data[i + 3];
+    if (alpha > 20) {
+      pixelCount++;
+      const pixelIndex = i / 4;
+      const x = pixelIndex % img.width;
+      const y = Math.floor(pixelIndex / img.width);
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    }
+  }
+
+  const width = maxX - minX;
+  const height = maxY - minY;
+  const aspectRatio = width / (height || 1);
+
+  // 🔍 กฎเพิ่มเติม
+  const hasShape = pixelCount > 400;            // ต้องมีเส้นมากพอ
+  const isWide = aspectRatio > 1.3;             // ต้องกว้างกว่าแนวตั้ง
+  const isNotLine = width > 50 && height > 30;  // ต้องมีรูปร่าง ไม่ใช่เส้นบาง ๆ
+
+  // ✅ ผ่านก็ต่อเมื่อ AI คิดว่าเป็นปลา และรูปร่างเข้าเกณฑ์
+  return isAIThinkFish && hasShape && isWide && isNotLine;
+}
 
 // 🐟 เพิ่มปลาลงในน้ำ
 function addFishToAquarium(imageData) {
