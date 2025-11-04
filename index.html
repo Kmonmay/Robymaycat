@@ -3,18 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Robymaycat</title>
+  <title>Robymaycat Aquarium</title>
   <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cooper+Black&display=swap" rel="stylesheet">
 </head>
 <body>
   <header>
-    <h1>🐱 Robymaycat</h1>
+    <h1>🐱 Robymaycat Aquarium</h1>
     <p class="subtitle">You can feed my little cat. Just drawing your fish :)</p>
   </header>
 
   <section class="hero">
-    <video src="robymaycat-intro.mp4" playsinline muted autoplay loop preload="metadata" poster="poster.jpg"></video>
+    <div class="aquarium">
+      <video src="robymaycat-intro.mp4" playsinline muted autoplay loop preload="metadata"></video>
+      <div id="fishContainer"></div>
+    </div>
   </section>
 
   <main>
@@ -40,7 +43,7 @@
   </main>
 
   <footer>
-    <p>Made with 💙 by Robymaycat ☁️</p>
+    <p>Made with 💙 by Robymaycat</p>
   </footer>
 
   <script src="script.js"></script>
