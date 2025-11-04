@@ -71,7 +71,6 @@ document.getElementById('feedBtn').addEventListener('click', () => {
   setTimeout(() => cat.style.transform = 'scale(1) rotate(0deg)', 600);
 });
 
-// 🐟 เพิ่มปลาที่วาดใน Aquarium
 function addFishToAquarium(imageData) {
   if (fishList.length >= 15) {
     fishList[0].remove(); // ลบตัวเก่าสุด
@@ -82,8 +81,10 @@ function addFishToAquarium(imageData) {
   fish.src = imageData;
   fish.classList.add('fish');
 
-  // สุ่มตำแหน่ง
-  fish.style.top = Math.random() * 60 + '%';
+  // 🌊 จำกัดให้ปลาว่ายเฉพาะในโซนน้ำทะเล
+  const seaTop = 40;   // จุดเริ่มของทะเล (เปอร์เซ็นต์จากบน)
+  const seaHeight = 35; // ความสูงของทะเล (เปอร์เซ็นต์)
+  fish.style.top = seaTop + Math.random() * seaHeight + '%';
   fish.style.left = Math.random() * 60 + '%';
   fish.style.animationDuration = (8 + Math.random() * 4) + 's';
 
