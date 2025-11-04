@@ -1,29 +1,41 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Robymaycat</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <header>
     <h1>🐱 Robymaycat</h1>
-    <p>วาดปลาของคุณ แล้วให้อาหารแมวกัน!</p>
+    <p class="subtitle">You can feed my little cat. Just drawing your fish :)</p>
   </header>
 
+  <section class="hero">
+    <video src="robymaycat-intro.mp4" playsinline muted autoplay loop preload="metadata" poster="poster.jpg"></video>
+  </section>
+
   <main>
+    <div class="color-picker">
+      <label>Select color:</label>
+      <button class="color-btn pink" data-color="#ff91a4"></button>
+      <button class="color-btn brown" data-color="#a67b5b"></button>
+      <button class="color-btn blue" data-color="#3399ff"></button>
+      <button class="color-btn red" data-color="#ff4d4d"></button>
+    </div>
+
     <div class="draw-area">
       <canvas id="drawCanvas" width="400" height="300"></canvas>
       <div class="buttons">
-        <button id="clearBtn">🧼 วาดใหม่</button>
-        <button id="feedBtn">🍽️ ให้อาหารแมว</button>
+        <button id="clearBtn">🧼 Clear</button>
+        <button id="feedBtn">🍽️ Feed the Cat</button>
       </div>
     </div>
 
     <div class="cat-area">
-      <img id="cat" src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="cute cat" />
+      <img id="cat" src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="cute cat">
     </div>
   </main>
 
