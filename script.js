@@ -77,37 +77,8 @@ document.getElementById('feedBtn').addEventListener('click', async () => {
 });
 
 // 🧠 ตรวจว่าเป็นปลาไหม (ใช้ Hugging Face API)
+// 🐟 เวอร์ชันใจดี: ไม่ใช้ AI แล้ว ตรวจเฉพาะลักษณะภาพ
 async function checkIfFish(imageData) {
-  const API_URL = "https://api-inference.huggingface.co/models/cafeai/sketch-image-classification";
-  const TOKEN = "hf_your_api_token_here"; // ใช้ token ของเธอที่ได้จาก Hugging Face
-
-  // 🧠 ขั้นตอนที่ 1: ส่งให้ AI ตรวจ
-  let isAIThinkFish = false;
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${TOKEN}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ inputs: imageData })
-    });
-
-    const data = await res.json();
-    const predictions = data[0];
-    const fishLike = predictions.find(p =>
-      p.label.toLowerCase().includes("fish") ||
-      p.label.toLowerCase().includes("aquatic")
-    );
-
-    if (fishLike && fishLike.score > 0.5) {
-      isAIThinkFish = true;
-    }
-  } catch (e) {
-    console.error("AI check failed:", e);
-  }
-
-  // 🧮 ขั้นตอนที่ 2: ตรวจลักษณะรูปทรงพื้นฐาน
   const img = new Image();
   img.src = imageData;
   await new Promise(r => img.onload = r);
@@ -140,13 +111,12 @@ async function checkIfFish(imageData) {
   const height = maxY - minY;
   const aspectRatio = width / (height || 1);
 
-  // 🔍 กฎเพิ่มเติม
-  const hasShape = pixelCount > 400;            // ต้องมีเส้นมากพอ
-  const isWide = aspectRatio > 1.3;             // ต้องกว้างกว่าแนวตั้ง
-  const isNotLine = width > 50 && height > 30;  // ต้องมีรูปร่าง ไม่ใช่เส้นบาง ๆ
+  // 🩵 เกณฑ์แบบใจดี
+  const enoughPixels = pixelCount > 100;      // วาดนิดหน่อยก็พอ
+  const looksLikeFish = aspectRatio > 1.1;    // ต้องกว้างนิดหนึ่ง
+  const bigEnough = width > 30 && height > 15; // กันแค่จุดเล็ก ๆ
 
-  // ✅ ผ่านก็ต่อเมื่อ AI คิดว่าเป็นปลา และรูปร่างเข้าเกณฑ์
-  return isAIThinkFish && hasShape && isWide && isNotLine;
+  return enoughPixels && looksLikeFish && bigEnough;
 }
 
 // 🐟 เพิ่มปลาลงในน้ำ
