@@ -1,7 +1,9 @@
 const canvas = document.getElementById('drawCanvas');
 const ctx = canvas.getContext('2d');
+const fishContainer = document.getElementById('fishContainer');
 let drawing = false;
-let currentColor = '#3399ff'; // default blue
+let currentColor = '#3399ff';
+let fishList = [];
 
 // 🎨 เปลี่ยนสี
 document.querySelectorAll('.color-btn').forEach(btn => {
@@ -60,16 +62,31 @@ document.getElementById('clearBtn').addEventListener('click', () => {
 
 // 🍽️ ให้อาหารแมว
 document.getElementById('feedBtn').addEventListener('click', () => {
+  const imageData = canvas.toDataURL('image/png');
+  addFishToAquarium(imageData);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   const cat = document.getElementById('cat');
   cat.style.transform = 'scale(1.1) rotate(5deg)';
+  setTimeout(() => cat.style.transform = 'scale(1) rotate(0deg)', 600);
+});
+
+// 🐟 เพิ่มปลาที่วาดใน Aquarium
+function addFishToAquarium(imageData) {
+  if (fishList.length >= 15) {
+    fishList[0].remove(); // ลบตัวเก่าสุด
+    fishList.shift();
+  }
 
   const fish = document.createElement('img');
-  fish.src = 'https://cdn-icons-png.flaticon.com/512/616/616408.png';
+  fish.src = imageData;
   fish.classList.add('fish');
-  document.body.appendChild(fish);
 
-  setTimeout(() => {
-    fish.remove();
-    cat.style.transform = 'scale(1) rotate(0deg)';
-  }, 2000);
-});
+  // สุ่มตำแหน่ง
+  fish.style.top = Math.random() * 60 + '%';
+  fish.style.left = Math.random() * 60 + '%';
+  fish.style.animationDuration = (8 + Math.random() * 4) + 's';
+
+  fishContainer.appendChild(fish);
+  fishList.push(fish);
+}
