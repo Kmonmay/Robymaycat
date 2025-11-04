@@ -3,7 +3,7 @@ const ctx = canvas.getContext('2d');
 const fishContainer = document.getElementById('fishContainer');
 let drawing = false;
 let currentColor = '#000000';
-let fishList = [];
+let fishList = JSON.parse(localStorage.getItem('myFish')) || [];
 
 // 🎨 เปลี่ยนสี
 const colorButtons = document.querySelectorAll('.color-btn');
@@ -26,7 +26,7 @@ function draw(x, y) {
   if (!drawing) return;
   ctx.lineTo(x, y);
   ctx.strokeStyle = currentColor;
-  ctx.lineWidth = 5; // 🖋️ เพิ่มความหนาเส้น
+  ctx.lineWidth = 5;
   ctx.lineCap = 'round';
   ctx.stroke();
 }
@@ -61,14 +61,46 @@ document.getElementById('clearBtn').addEventListener('click', () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
 
-// 🍽️ ให้อาหาร = เพิ่มปลาลงในน้ำ
-document.getElementById('feedBtn').addEventListener('click', () => {
+// 🍽️ ปุ่ม Feed → ตรวจว่าเป็นปลาไหม ก่อนปล่อยลงน้ำ
+document.getElementById('feedBtn').addEventListener('click', async () => {
   const imageData = canvas.toDataURL('image/png');
+
+  const isFish = await checkIfFish(imageData);
+  if (!isFish) {
+    alert("Oops! That doesn’t look like a fish. Try drawing again :)");
+    return;
+  }
+
   addFishToAquarium(imageData);
+  saveFish(imageData);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
 
-// 🐟 เพิ่มปลาที่วาดใน Aquarium
+// 🧠 ตรวจว่าเป็นปลาไหม (ใช้ Hugging Face API)
+async function checkIfFish(imageData) {
+  const API_URL = "https://api-inference.huggingface.co/models/google/vit-base-patch16-224";
+  const TOKEN = "hf_your_api_token_here"; // 👈 วาง token ของเธอจาก HuggingFace
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${TOKEN}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ inputs: imageData })
+    });
+
+    const data = await res.json();
+    const prediction = data[0][0];
+    return prediction.label.toLowerCase().includes("fish");
+  } catch (e) {
+    console.error(e);
+    return true; // ถ้าตรวจไม่ได้ ให้ผ่านไปก่อน (ไม่บล็อก)
+  }
+}
+
+// 🐟 เพิ่มปลาลงในน้ำ
 function addFishToAquarium(imageData) {
   if (fishList.length >= 15) {
     fishList[0].remove();
@@ -79,7 +111,6 @@ function addFishToAquarium(imageData) {
   fish.src = imageData;
   fish.classList.add('fish');
 
-  // 🌊 จำกัดให้ปลาว่ายเฉพาะในโซนน้ำ
   const seaTop = 40;
   const seaHeight = 35;
   fish.style.top = seaTop + Math.random() * seaHeight + '%';
@@ -89,3 +120,32 @@ function addFishToAquarium(imageData) {
   fishContainer.appendChild(fish);
   fishList.push(fish);
 }
+
+// 💾 เก็บปลาไว้ใน localStorage
+function saveFish(imageData) {
+  let myFish = JSON.parse(localStorage.getItem('myFish')) || [];
+  myFish.push(imageData);
+  localStorage.setItem('myFish', JSON.stringify(myFish));
+}
+
+// 🐠 ปุ่มดูปลา
+const modal = document.getElementById('fishListModal');
+const listContainer = document.getElementById('fishList');
+document.getElementById('viewBtn').addEventListener('click', () => {
+  listContainer.innerHTML = '';
+  const storedFish = JSON.parse(localStorage.getItem('myFish')) || [];
+  if (storedFish.length === 0) {
+    listContainer.innerHTML = '<p>No fish yet!</p>';
+  } else {
+    storedFish.forEach(img => {
+      const el = document.createElement('img');
+      el.src = img;
+      listContainer.appendChild(el);
+    });
+  }
+  modal.style.display = 'flex';
+});
+
+document.getElementById('closeModal').addEventListener('click', () => {
+  modal.style.display = 'none';
+});
