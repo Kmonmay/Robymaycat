@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Robymaycat Aquarium</title>
+  <title>Robymaycat</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Cooper+Black&display=swap" rel="stylesheet">
 </head>
 <body>
   <header>
-    <h1>🐱 Robymaycat Aquarium</h1>
+    <h1>Robymaycat</h1>
     <p class="subtitle">You can feed my little cat. Just drawing your fish :)</p>
   </header>
 
@@ -34,9 +34,18 @@
       <div class="buttons">
         <button id="clearBtn">🧼 Clear</button>
         <button id="feedBtn">🍽️ Feed</button>
+        <button id="viewBtn">🐠 View My Fish</button>
       </div>
     </div>
   </main>
+
+  <div id="fishListModal" class="modal">
+    <div class="modal-content">
+      <h2>My Fish List</h2>
+      <div id="fishList"></div>
+      <button id="closeModal">Close</button>
+    </div>
+  </div>
 
   <footer>
     <p>Made with 💙 by Robymaycat</p>
