@@ -168,3 +168,6 @@ document.getElementById('viewBtn').addEventListener('click', () => {
 document.getElementById('closeModal').addEventListener('click', () => {
   modal.style.display = 'none';
 });
+// 🎵 Background music autoplay (soft volume)
+const bgMusic = document.getElementById('bgMusic');
+bgMusic.volume = 0.3; // ปรับความดัง 0–1 (เบา ๆ ฟังสบาย)
