@@ -79,6 +79,8 @@ h1 {
 .brown { background-color: #a67b5b; }
 .red { background-color: #ff4d4d; }
 .black { background-color: #000000; }
+.yellow { background-color: #ffd966; }  /* เหลืองนุ่ม */
+.green { background-color: #7ed957; }   /* เขียวสดพอดี */
 
 canvas {
   border: 3px dashed #99ccff;
