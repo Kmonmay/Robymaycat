@@ -130,8 +130,8 @@ function addFishToAquarium(imageData) {
   fish.src = imageData;
   fish.classList.add('fish');
 
-  const seaTop = 40;
-  const seaHeight = 60;
+  const seaTop = 30;
+  const seaHeight = 70;
   fish.style.top = seaTop + Math.random() * seaHeight + '%';
   fish.style.left = Math.random() * 60 + '%';
   fish.style.animationDuration = (8 + Math.random() * 4) + 's';
