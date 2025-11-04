@@ -78,8 +78,8 @@ document.getElementById('feedBtn').addEventListener('click', async () => {
 
 // 🧠 ตรวจว่าเป็นปลาไหม (ใช้ Hugging Face API)
 async function checkIfFish(imageData) {
-  const API_URL = "https://api-inference.huggingface.co/models/google/vit-base-patch16-224";
-  const TOKEN = "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"; // 👈 วาง token ของเธอจาก HuggingFace
+  const API_URL = "https://api-inference.huggingface.co/models/cafeai/sketch-image-classification";
+  const TOKEN = "hf_your_api_token_here"; // ใช้ token เดิมได้เลย
 
   try {
     const res = await fetch(API_URL, {
@@ -92,13 +92,22 @@ async function checkIfFish(imageData) {
     });
 
     const data = await res.json();
-    const prediction = data[0][0];
-    return prediction.label.toLowerCase().includes("fish");
+
+    // หา label ที่เป็น fish หรือ aquatic
+    const predictions = data[0];
+    const fishLike = predictions.find(p =>
+      p.label.toLowerCase().includes("fish") ||
+      p.label.toLowerCase().includes("aquatic")
+    );
+
+    // ต้องมั่นใจอย่างน้อย 0.5 ขึ้นไปถึงจะผ่าน
+    return fishLike && fishLike.score > 0.5;
   } catch (e) {
-    console.error(e);
-    return true; // ถ้าตรวจไม่ได้ ให้ผ่านไปก่อน (ไม่บล็อก)
+    console.error("AI check failed:", e);
+    return true; // ถ้าเชื่อมต่อไม่ได้ ให้ผ่านไปก่อน
   }
 }
+
 
 // 🐟 เพิ่มปลาลงในน้ำ
 function addFishToAquarium(imageData) {
