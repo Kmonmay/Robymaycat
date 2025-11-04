@@ -107,3 +107,25 @@ footer {
   font-size: 0.9rem;
   color: #888;
 }
+
+/* modal fish list */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  align-items: center;
+  justify-content: center;
+}
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 15px;
+  width: 80%;
+  max-width: 500px;
+}
+#fishList img {
+  width: 100px;
+  margin: 5px;
+  border-radius: 10px;
+}
