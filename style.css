@@ -60,18 +60,25 @@ h1 {
 .color-btn {
   width: 40px;
   height: 40px;
-  border-radius: 50%; /* 🟢 กลมเป๊ะ! */
-  border: 2px solid #fff;
+  border-radius: 50%;
+  border: 3px solid transparent;
   margin: 0 8px;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, border 0.2s ease;
 }
-.color-btn:hover { transform: scale(1.2); box-shadow: 0 0 8px rgba(0,0,0,0.2); }
+.color-btn:hover {
+  transform: scale(1.15);
+}
+
+.color-btn.active {
+  border: 3px solid #333;
+  transform: scale(1.2);
+}
 
 .pink { background-color: #ff91a4; }
 .brown { background-color: #a67b5b; }
-.blue { background-color: #3399ff; }
 .red { background-color: #ff4d4d; }
+.black { background-color: #000000; }
 
 canvas {
   border: 3px dashed #99ccff;
@@ -93,12 +100,6 @@ button {
 }
 button:hover {
   background-color: #99d6ff;
-}
-
-#cat {
-  width: 150px;
-  margin-top: 40px;
-  transition: transform 0.6s ease;
 }
 
 footer {
