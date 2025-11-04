@@ -2,15 +2,16 @@ const canvas = document.getElementById('drawCanvas');
 const ctx = canvas.getContext('2d');
 const fishContainer = document.getElementById('fishContainer');
 let drawing = false;
-let currentColor = '#3399ff';
+let currentColor = '#000000';
 let fishList = [];
 
 // 🎨 เปลี่ยนสี
-document.querySelectorAll('.color-btn').forEach(btn => {
+const colorButtons = document.querySelectorAll('.color-btn');
+colorButtons.forEach(btn => {
   btn.addEventListener('click', () => {
     currentColor = btn.getAttribute('data-color');
-    document.querySelectorAll('.color-btn').forEach(b => b.style.border = '2px solid #fff');
-    btn.style.border = '3px solid #333';
+    colorButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
   });
 });
 
@@ -25,7 +26,7 @@ function draw(x, y) {
   if (!drawing) return;
   ctx.lineTo(x, y);
   ctx.strokeStyle = currentColor;
-  ctx.lineWidth = 3;
+  ctx.lineWidth = 5; // 🖋️ เพิ่มความหนาเส้น
   ctx.lineCap = 'round';
   ctx.stroke();
 }
@@ -60,20 +61,17 @@ document.getElementById('clearBtn').addEventListener('click', () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
 
-// 🍽️ ให้อาหารแมว
+// 🍽️ ให้อาหาร = เพิ่มปลาลงในน้ำ
 document.getElementById('feedBtn').addEventListener('click', () => {
   const imageData = canvas.toDataURL('image/png');
   addFishToAquarium(imageData);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  const cat = document.getElementById('cat');
-  cat.style.transform = 'scale(1.1) rotate(5deg)';
-  setTimeout(() => cat.style.transform = 'scale(1) rotate(0deg)', 600);
 });
 
+// 🐟 เพิ่มปลาที่วาดใน Aquarium
 function addFishToAquarium(imageData) {
   if (fishList.length >= 15) {
-    fishList[0].remove(); // ลบตัวเก่าสุด
+    fishList[0].remove();
     fishList.shift();
   }
 
@@ -81,9 +79,9 @@ function addFishToAquarium(imageData) {
   fish.src = imageData;
   fish.classList.add('fish');
 
-  // 🌊 จำกัดให้ปลาว่ายเฉพาะในโซนน้ำทะเล
-  const seaTop = 40;   // จุดเริ่มของทะเล (เปอร์เซ็นต์จากบน)
-  const seaHeight = 35; // ความสูงของทะเล (เปอร์เซ็นต์)
+  // 🌊 จำกัดให้ปลาว่ายเฉพาะในโซนน้ำ
+  const seaTop = 40;
+  const seaHeight = 35;
   fish.style.top = seaTop + Math.random() * seaHeight + '%';
   fish.style.left = Math.random() * 60 + '%';
   fish.style.animationDuration = (8 + Math.random() * 4) + 's';
