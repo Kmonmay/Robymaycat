@@ -79,7 +79,7 @@ document.getElementById('feedBtn').addEventListener('click', async () => {
 // 🧠 ตรวจว่าเป็นปลาไหม (ใช้ Hugging Face API)
 async function checkIfFish(imageData) {
   const API_URL = "https://api-inference.huggingface.co/models/google/vit-base-patch16-224";
-  const TOKEN = "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"; // 👈 วาง token ของเธอจาก HuggingFace
+  const TOKEN = "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"; // 👈 วาง token ของเธอจาก HuggingFace
 
   try {
     const res = await fetch(API_URL, {
