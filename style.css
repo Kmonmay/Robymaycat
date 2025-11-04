@@ -1,40 +1,69 @@
 body {
   margin: 0;
   font-family: "Comic Neue", cursive;
-  background: linear-gradient(to bottom, #e6f7ff, #ffffff);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 100vh;
-  overflow-x: hidden;
+  background: linear-gradient(to bottom, #f0f8ff, #ffffff);
+  text-align: center;
+  color: #444;
 }
 
 header {
-  text-align: center;
   margin-top: 30px;
 }
 
 h1 {
   color: #4da6ff;
   font-size: 2.5rem;
+  margin-bottom: 0.2em;
 }
 
-p {
-  color: #555;
+.subtitle {
+  font-size: 1.1rem;
+  color: #666;
 }
+
+.hero {
+  margin: 20px auto;
+}
+
+.hero video {
+  width: min(720px, 90vw);
+  border-radius: 16px;
+  display: block;
+  margin: 0 auto 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.color-picker {
+  margin: 20px 0;
+  font-size: 1.1rem;
+}
+
+.color-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  margin: 0 6px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.color-btn:hover { transform: scale(1.2); }
+
+.pink { background-color: #ff91a4; }
+.brown { background-color: #a67b5b; }
+.blue { background-color: #3399ff; }
+.red { background-color: #ff4d4d; }
 
 .draw-area {
-  margin-top: 20px;
-  text-align: center;
+  margin-top: 15px;
 }
 
 canvas {
   border: 3px dashed #99ccff;
-  border-radius: 20px;
+  border-radius: 16px;
   background-color: #f9fcff;
   cursor: crosshair;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .buttons {
@@ -51,7 +80,6 @@ button {
   margin: 0 8px;
   transition: 0.3s;
 }
-
 button:hover {
   background-color: #99d6ff;
 }
