@@ -139,3 +139,15 @@ button:hover { background:#99d6ff; }
 #fishList img { width:100px; margin:5px; border-radius:10px; }
 
 footer { margin:30px 0; font-size:.9rem; color:#888; }
+.pop-bubble {
+  position: absolute;
+  bottom: 0;
+  border-radius: 50%;
+  animation: pop 0.5s ease-out forwards;
+}
+@keyframes pop {
+  0% { transform: scale(0.7); opacity: 0.8; }
+  70% { transform: scale(1.4); opacity: 1; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
