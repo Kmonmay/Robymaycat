@@ -1,10 +1,8 @@
-// Drawing logic
 const canvas = document.getElementById('drawCanvas');
 const ctx = canvas.getContext('2d');
 let drawing = false;
 let currentColor = '#000000';
 
-// 🎨 Change color
 document.querySelectorAll('.color-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     currentColor = btn.getAttribute('data-color');
@@ -18,69 +16,30 @@ canvas.addEventListener('mousemove', e => draw(e.offsetX, e.offsetY));
 canvas.addEventListener('mouseup', () => drawing=false);
 canvas.addEventListener('mouseleave', () => drawing=false);
 
-canvas.addEventListener('touchstart', e => {
-  e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  const t = e.touches[0];
-  start(t.clientX-rect.left, t.clientY-rect.top);
-});
-canvas.addEventListener('touchmove', e => {
-  e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  const t = e.touches[0];
-  draw(t.clientX-rect.left, t.clientY-rect.top);
-});
-canvas.addEventListener('touchend', ()=>drawing=false);
-
 function start(x,y){ drawing=true; ctx.beginPath(); ctx.moveTo(x,y);}
 function draw(x,y){
   if(!drawing) return;
   ctx.lineTo(x,y);
   ctx.strokeStyle=currentColor;
-  ctx.lineWidth=8; // ✅ เส้นใหญ่ขึ้น
+  ctx.lineWidth=8;
   ctx.lineCap='round';
   ctx.stroke();
 }
 
-// Clear
 document.getElementById('clearBtn').addEventListener('click',()=>ctx.clearRect(0,0,canvas.width,canvas.height));
 
-// Fish area
 const fishContainer=document.getElementById('fishContainer');
-let fishList=[];
-
 function addFishToAquarium(imageData){
-  if(fishList.length>=15){ fishList[0].remove(); fishList.shift(); }
   const fish=document.createElement('img');
   fish.src=imageData;
   fish.classList.add('fish');
-  fish.style.width = '120px'; // ✅ ปลาขนาดใหญ่ขึ้น
-  const seaTop=60, seaHeight=25;
-  fish.style.top=seaTop+Math.random()*seaHeight+'%';
+  fish.style.width='120px';
+  fish.style.top=60+Math.random()*25+'%';
   fish.style.left=Math.random()*60+'%';
   fish.style.animationDuration=(8+Math.random()*4)+'s';
   fishContainer.appendChild(fish);
-  fishList.push(fish);
-}
-function saveFish(imageData){
-  let myFish=JSON.parse(localStorage.getItem('myFish'))||[];
-  myFish.push(imageData);
-  localStorage.setItem('myFish',JSON.stringify(myFish));
 }
 
-// View fish
-const modal=document.getElementById('fishListModal');
-const list=document.getElementById('fishList');
-document.getElementById('viewBtn').addEventListener('click',()=>{
-  list.innerHTML='';
-  const stored=JSON.parse(localStorage.getItem('myFish'))||[];
-  if(stored.length===0) list.innerHTML='<p>No fish yet!</p>';
-  else stored.forEach(img=>{const i=document.createElement('img');i.src=img;list.appendChild(i);});
-  modal.style.display='flex';
-});
-document.getElementById('closeModal').addEventListener('click',()=>modal.style.display='none');
-
-// Reaction text + bubbles
 function showReaction(text){
   const t=document.getElementById('reactionText');
   t.textContent=text;
@@ -101,59 +60,38 @@ function spawnBubbles(){
     setTimeout(()=>b.remove(),3000);
   }
 }
-function popBubbles(){
-  const c=document.getElementById('bubbles');
-  for(let i=0;i<5;i++){
-    const b=document.createElement('div');
-    b.classList.add('pop-bubble');
-    b.style.left=Math.random()*100+'%';
-    b.style.bottom=Math.random()*50+'px';
-    c.appendChild(b);
-    setTimeout(()=>b.remove(),600);
-  }
-}
 
-// Feed button
-document.getElementById('feedBtn').addEventListener('click',async()=>{
+document.getElementById('feedBtn').addEventListener('click',()=>{
   const img=canvas.toDataURL('image/png');
-  const isFish=await checkIfFish(img);
-
-  if(!isFish){
-    showReaction("That’s not a fish… ew!");
-    popBubbles();
-    return;
-  }
-
   showReaction("Yummy! Thank you for the fish!");
   spawnBubbles();
-  addFishToAquarium(img); saveFish(img);
+  addFishToAquarium(img);
   ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(window.saveFish) window.saveFish(img);
 });
 
-// Check fish (medium difficulty)
-async function checkIfFish(imageData){
-  const img=new Image(); img.src=imageData;
-  await new Promise(r=>img.onload=r);
-  const temp=document.createElement('canvas');
-  const tctx=temp.getContext('2d');
-  temp.width=img.width; temp.height=img.height;
-  tctx.drawImage(img,0,0);
-  const d=tctx.getImageData(0,0,img.width,img.height);
-  let px=0,minX=img.width,maxX=0,minY=img.height,maxY=0;
-  for(let i=0;i<d.data.length;i+=4){
-    if(d.data[i+3]>20){
-      px++;
-      const idx=i/4;
-      const x=idx%img.width; const y=Math.floor(idx/img.width);
-      if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y;
-    }
+if(window.db){
+  const dbRef=window.firebaseRef(window.db,'fishes');
+  async function uploadFish(imageData){
+    await window.firebasePush(dbRef,{image:imageData,time:Date.now()});
   }
-  const width=maxX-minX; const height=maxY-minY;
-  const aspect=width/(height||1);
-  const enough=px>220, wide=aspect>1.2, decent=width>40&&height>25;
-  return enough && wide && decent;
+  window.firebaseOnValue(window.firebaseLimit(dbRef,15),(snapshot)=>{
+    const data=snapshot.val();
+    if(!data) return;
+    fishContainer.innerHTML='';
+    Object.values(data).forEach(fish=>{
+      const fishImg=document.createElement('img');
+      fishImg.src=fish.image;
+      fishImg.classList.add('fish');
+      fishImg.style.width='120px';
+      fishImg.style.top=60+Math.random()*25+'%';
+      fishImg.style.left=Math.random()*60+'%';
+      fishImg.style.animationDuration=(8+Math.random()*4)+'s';
+      fishContainer.appendChild(fishImg);
+    });
+  });
+  window.saveFish=uploadFish;
 }
 
-// Music
 const bg=document.getElementById('bgMusic');
 if(bg) bg.volume=0.3;
