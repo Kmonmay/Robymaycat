@@ -64,25 +64,88 @@ document.getElementById('clearBtn').addEventListener('click', () => {
 // 🍽️ ปุ่ม Feed → ตรวจว่าเป็นปลาไหม ก่อนปล่อยลงน้ำ
 document.getElementById('feedBtn').addEventListener('click', async () => {
   const imageData = canvas.toDataURL('image/png');
+  const cat = document.getElementById('cat');
+  const catEw = document.getElementById('catEw');
+  const reactionText = document.getElementById('reactionText');
+  const bubbles = document.getElementById('bubbles');
+
+  reactionText.style.opacity = 0;
+  cat.style.display = "block";
+  catEw.style.display = "none";
 
   const isFish = await checkIfFish(imageData);
+
   if (!isFish) {
-    alert("Oops! That doesn’t look like a fish. Try drawing again :)");
+    // ❌ ไม่ใช่ปลา → แมวขยะแขยง + ฟองแตก
+    cat.style.display = "none";
+    catEw.style.display = "block";
+    showReaction("That’s not a fish… ew!");
+    popBubbles();
+    setTimeout(() => {
+      cat.style.display = "block";
+      catEw.style.display = "none";
+    }, 1500);
     return;
   }
+
+  // ✅ เป็นปลา → แมวดีใจ กระโดด + ฟองลอย
+  cat.style.transform = 'translateY(-20px)';
+  showReaction("Yummy! Thank you for the fish!");
+  spawnBubbles();
 
   addFishToAquarium(imageData);
   saveFish(imageData);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  setTimeout(() => { cat.style.transform = 'translateY(0)'; }, 600);
 });
 
+// 🫧 ฟองน้ำแตกตอนแมวไม่กิน
+function popBubbles() {
+  const container = document.getElementById('bubbles');
+  for (let i = 0; i < 5; i++) {
+    const bubble = document.createElement('div');
+    bubble.classList.add('pop-bubble');
+    bubble.style.left = `${Math.random() * 100}%`;
+    bubble.style.bottom = `${Math.random() * 50}px`;
+    container.appendChild(bubble);
+    setTimeout(() => bubble.remove(), 600);
+  }
+}
+
 // 🧠 ตรวจว่าเป็นปลาไหม (ใช้ Hugging Face API)
-// 🐟 เวอร์ชันใจดี: ไม่ใช้ AI แล้ว ตรวจเฉพาะลักษณะภาพ
+// 🐟 ฉลาดพอดี: รูปร่างเหมือนปลาผ่าน, เส้นมั่วไม่ผ่าน
 async function checkIfFish(imageData) {
+  const API_URL = "https://api-inference.huggingface.co/models/cafeai/sketch-image-classification";
+  const TOKEN = "hf_your_api_token_here"; // ใส่ token ของเธอ
+
+  let aiSaysFish = false;
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${TOKEN}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ inputs: imageData })
+    });
+
+    const data = await res.json();
+    const predictions = data[0];
+    const fishResult = predictions.find(p =>
+      p.label.toLowerCase().includes("fish") ||
+      p.label.toLowerCase().includes("aquatic")
+    );
+
+    if (fishResult && fishResult.score > 0.35) aiSaysFish = true; // ใจดีขึ้น
+  } catch (e) {
+    console.warn("AI check skipped:", e);
+  }
+
+  // รูปร่างทั่วไป
   const img = new Image();
   img.src = imageData;
   await new Promise(r => img.onload = r);
-
   const tempCanvas = document.createElement('canvas');
   const tctx = tempCanvas.getContext('2d');
   tempCanvas.width = img.width;
@@ -90,16 +153,14 @@ async function checkIfFish(imageData) {
   tctx.drawImage(img, 0, 0);
 
   const imgData = tctx.getImageData(0, 0, img.width, img.height);
-  let pixelCount = 0;
-  let minX = img.width, maxX = 0, minY = img.height, maxY = 0;
-
+  let pixelCount = 0, minX = img.width, maxX = 0, minY = img.height, maxY = 0;
   for (let i = 0; i < imgData.data.length; i += 4) {
     const alpha = imgData.data[i + 3];
     if (alpha > 20) {
       pixelCount++;
-      const pixelIndex = i / 4;
-      const x = pixelIndex % img.width;
-      const y = Math.floor(pixelIndex / img.width);
+      const p = i / 4;
+      const x = p % img.width;
+      const y = Math.floor(p / img.width);
       if (x < minX) minX = x;
       if (x > maxX) maxX = x;
       if (y < minY) minY = y;
@@ -111,13 +172,13 @@ async function checkIfFish(imageData) {
   const height = maxY - minY;
   const aspectRatio = width / (height || 1);
 
-  // 🩵 เกณฑ์แบบใจดี
-  const enoughPixels = pixelCount > 100;      // วาดนิดหน่อยก็พอ
-  const looksLikeFish = aspectRatio > 1.1;    // ต้องกว้างนิดหนึ่ง
-  const bigEnough = width > 30 && height > 15; // กันแค่จุดเล็ก ๆ
+  const enoughPixels = pixelCount > 200;   // ต้องวาดพอประมาณ
+  const wideShape = aspectRatio > 1.2;     // ต้องแนวนอนหน่อย
+  const decentSize = width > 40 && height > 25;
 
-  return enoughPixels && looksLikeFish && bigEnough;
+  return aiSaysFish && enoughPixels && wideShape && decentSize;
 }
+
 
 // 🐟 เพิ่มปลาลงในน้ำ
 function addFishToAquarium(imageData) {
