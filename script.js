@@ -3,7 +3,7 @@ const ctx = canvas.getContext("2d");
 let drawing = false;
 let currentColor = "#000000";
 
-// 🧠 ให้ขนาดของ canvas สอดคล้องกับจอมือถือ
+// ✅ ให้ขนาด canvas สอดคล้องกับหน้าจอ
 function resizeCanvas() {
   const rect = canvas.getBoundingClientRect();
   canvas.width = rect.width;
@@ -21,13 +21,13 @@ document.querySelectorAll(".color-btn").forEach((btn) => {
   });
 });
 
-// 🖱 Mouse event (คอม)
+// 🖱 Mouse events
 canvas.addEventListener("mousedown", (e) => startDraw(e.offsetX, e.offsetY));
 canvas.addEventListener("mousemove", (e) => draw(e.offsetX, e.offsetY));
 canvas.addEventListener("mouseup", stopDraw);
 canvas.addEventListener("mouseleave", stopDraw);
 
-// 📱 Touch event (มือถือ)
+// 📱 Touch events
 canvas.addEventListener("touchstart", (e) => {
   e.preventDefault();
   const pos = getTouchPos(e);
@@ -43,10 +43,7 @@ canvas.addEventListener("touchend", stopDraw);
 function getTouchPos(e) {
   const rect = canvas.getBoundingClientRect();
   const touch = e.touches[0] || e.changedTouches[0];
-  return {
-    x: touch.clientX - rect.left,
-    y: touch.clientY - rect.top,
-  };
+  return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
 }
 
 function startDraw(x, y) {
@@ -71,7 +68,7 @@ document.getElementById("clearBtn").addEventListener("click", () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
 
-// 🧠 ตรวจว่ารูปคล้ายปลา (ฉลาดพอดี)
+// 🧠 ตรวจว่ารูปร่าง "คล้ายปลา" แบบฉลาดพอดี
 async function checkIfFish(imageData) {
   return new Promise((resolve) => {
     const image = new Image();
@@ -96,8 +93,7 @@ async function checkIfFish(imageData) {
         }
       }
 
-      // 🔹 ถ้าวาดน้อยเกินไป ไม่ใช่ปลาแน่
-      if (points.length < 80) return resolve(false);
+      if (points.length < 80) return resolve(false); // วาดน้อยเกิน
 
       const xs = points.map(p => p.x);
       const ys = points.map(p => p.y);
@@ -106,15 +102,12 @@ async function checkIfFish(imageData) {
       const width = maxX - minX;
       const height = maxY - minY;
 
-      // อัตราส่วนปลา (ยาวมากกว่ากว้าง)
+      // ✅ เกณฑ์ปลา
       const ratio = width / height;
       if (ratio < 1.5 || ratio > 3.5) return resolve(false);
-
-      // ความหนาแน่น (วาดบางเกินหรือทึบเกิน)
       const density = points.length / (width * height);
       if (density < 0.02 || density > 0.35) return resolve(false);
 
-      // ความต่อเนื่องของเส้นแนวนอน (เพื่อกันเส้นมั่ว)
       let lineChanges = 0;
       let prevX = points[0].x;
       for (let i = 1; i < points.length; i++) {
@@ -122,22 +115,21 @@ async function checkIfFish(imageData) {
         if (dx > 15) lineChanges++;
         prevX = points[i].x;
       }
-      if (lineChanges > 40) return resolve(false); // มั่วเกินไป
+      if (lineChanges > 40) return resolve(false);
 
-      // ✅ ถ้าผ่านทุกเงื่อนไข ถือว่าเป็นปลา
       resolve(true);
     };
   });
 }
+
+// 🍽️ ปุ่ม Feed (ตรวจว่าผ่านไหม)
 document.getElementById("feedBtn").addEventListener("click", async () => {
   const img = canvas.toDataURL("image/png");
-
-  // ตรวจว่ารูปคล้ายปลาไหม
   const isFish = await checkIfFish(img);
 
   if (!isFish) {
     showReaction("That’s not a fish… ew! 🐱💬");
-    spawnBubblePop(); // เอฟเฟกต์ฟองแตก
+    spawnBubblePop();
     return;
   }
 
@@ -169,7 +161,7 @@ function showReaction(text) {
   setTimeout(() => (t.style.opacity = 0), 2000);
 }
 
-// 🫧 เอฟเฟกต์ฟอง
+// 🫧 ฟองปกติ
 function spawnBubbles() {
   const c = document.getElementById("bubbles");
   for (let i = 0; i < 6; i++) {
@@ -185,17 +177,22 @@ function spawnBubbles() {
   }
 }
 
-// 🍽️ Feed ปลาลงน้ำ
-document.getElementById("feedBtn").addEventListener("click", () => {
-  const img = canvas.toDataURL("image/png");
-  showReaction("Yummy! Thank you for the fish!");
-  spawnBubbles();
-  addFishToAquarium(img);
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  if (window.saveFish) window.saveFish(img);
-});
+// 🫧 ฟองแตก (ตอนแมวไม่กิน)
+function spawnBubblePop() {
+  const c = document.getElementById("bubbles");
+  for (let i = 0; i < 6; i++) {
+    const b = document.createElement("div");
+    b.classList.add("pop-bubble");
+    const s = 12 + Math.random() * 14;
+    b.style.width = b.style.height = s + "px";
+    b.style.left = Math.random() * 100 + "%";
+    b.style.backgroundColor = `rgba(255,182,193,${0.5 + Math.random() * 0.3})`;
+    c.appendChild(b);
+    setTimeout(() => b.remove(), 800);
+  }
+}
 
-// 🌊 Firebase (แชร์ปลา)
+// 🌊 Firebase (Public Aquarium)
 if (window.db) {
   const dbRef = window.firebaseRef(window.db, "fishes");
   async function uploadFish(imageData) {
