@@ -37,7 +37,7 @@ function draw(x,y){
   if(!drawing) return;
   ctx.lineTo(x,y);
   ctx.strokeStyle=currentColor;
-  ctx.lineWidth=8;
+  ctx.lineWidth=8; // ✅ เส้นใหญ่ขึ้น
   ctx.lineCap='round';
   ctx.stroke();
 }
@@ -54,15 +54,18 @@ function addFishToAquarium(imageData){
   const fish=document.createElement('img');
   fish.src=imageData;
   fish.classList.add('fish');
-  fish.style.width = '120px'; // ✅ ปลาตัวใหญ่ขึ้นคูณสอง
-
-  const seaTop=60, seaHeight=25; // ปลาว่ายเฉพาะในน้ำ
+  fish.style.width = '120px'; // ✅ ปลาขนาดใหญ่ขึ้น
+  const seaTop=60, seaHeight=25;
   fish.style.top=seaTop+Math.random()*seaHeight+'%';
   fish.style.left=Math.random()*60+'%';
   fish.style.animationDuration=(8+Math.random()*4)+'s';
-
   fishContainer.appendChild(fish);
   fishList.push(fish);
+}
+function saveFish(imageData){
+  let myFish=JSON.parse(localStorage.getItem('myFish'))||[];
+  myFish.push(imageData);
+  localStorage.setItem('myFish',JSON.stringify(myFish));
 }
 
 // View fish
@@ -77,7 +80,7 @@ document.getElementById('viewBtn').addEventListener('click',()=>{
 });
 document.getElementById('closeModal').addEventListener('click',()=>modal.style.display='none');
 
-// Reactions
+// Reaction text + bubbles
 function showReaction(text){
   const t=document.getElementById('reactionText');
   t.textContent=text;
@@ -113,44 +116,22 @@ function popBubbles(){
 // Feed button
 document.getElementById('feedBtn').addEventListener('click',async()=>{
   const img=canvas.toDataURL('image/png');
-  const cat=document.getElementById('cat');
-  const ew=document.getElementById('catEw');
-
   const isFish=await checkIfFish(img);
+
   if(!isFish){
-    cat.style.display='none';
-    ew.style.display='block';
     showReaction("That’s not a fish… ew!");
     popBubbles();
-    setTimeout(()=>{cat.style.display='block';ew.style.display='none';},1500);
     return;
   }
 
-  cat.style.transform='translateY(-20px)';
   showReaction("Yummy! Thank you for the fish!");
   spawnBubbles();
   addFishToAquarium(img); saveFish(img);
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  setTimeout(()=>cat.style.transform='translateY(0)',600);
 });
 
 // Check fish (medium difficulty)
 async function checkIfFish(imageData){
-  const API_URL="https://api-inference.huggingface.co/models/cafeai/sketch-image-classification";
-  const TOKEN="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";
-
-  let aiSaysFish=false;
-  try{
-    const res=await fetch(API_URL,{
-      method:"POST",
-      headers:{Authorization:`Bearer ${TOKEN}`,"Content-Type":"application/json"},
-      body:JSON.stringify({inputs:imageData})
-    });
-    const data=await res.json();
-    const result=data[0].find(p=>p.label.toLowerCase().includes("fish"));
-    if(result&&result.score>0.3) aiSaysFish=true;
-  }catch{ aiSaysFish=true; }
-
   const img=new Image(); img.src=imageData;
   await new Promise(r=>img.onload=r);
   const temp=document.createElement('canvas');
@@ -170,7 +151,7 @@ async function checkIfFish(imageData){
   const width=maxX-minX; const height=maxY-minY;
   const aspect=width/(height||1);
   const enough=px>220, wide=aspect>1.2, decent=width>40&&height>25;
-  return aiSaysFish && enough && wide && decent;
+  return enough && wide && decent;
 }
 
 // Music
