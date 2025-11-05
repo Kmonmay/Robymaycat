@@ -34,7 +34,7 @@ h1 {
 }
 .fish {
   position: absolute;
-  width: 60px;
+  width: 120px;
   opacity: 0.9;
   animation: swim 10s linear infinite;
 }
@@ -79,26 +79,27 @@ button {
 }
 button:hover { background:#99d6ff; }
 
-/* Cat area */
-.cat-reaction {
+/* Reaction area */
+.reaction-area {
   position: relative;
   margin-top: 40px;
   display:flex;
   flex-direction:column;
   align-items:center;
-  height:200px;
-}
-#cat, #catEw {
-  width:140px;
-  transition:transform .4s;
+  height:180px;
 }
 #reactionText {
-  font-size:1.1rem; margin-top:10px;
-  color:#444; opacity:0; transition:opacity .5s;
+  font-size:1.3rem;
+  font-weight:bold;
+  color:#444;
+  opacity:0;
+  transition:opacity .5s;
+  animation: poptext 0.4s ease;
 }
-#bubbles {
-  position:absolute; bottom:0; width:100%; height:100%;
-  overflow:visible; pointer-events:none;
+@keyframes poptext {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); }
 }
 
 /* Bubble animation */
