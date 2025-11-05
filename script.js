@@ -68,7 +68,7 @@ document.getElementById("clearBtn").addEventListener("click", () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
 
-// 🧠 ตรวจว่ารูปร่าง "คล้ายปลา" แบบฉลาดพอดี
+// 🧠 ตรวจว่ารูปคล้ายปลา (ฉลาดพอดี เวอร์ชันเบา)
 async function checkIfFish(imageData) {
   return new Promise((resolve) => {
     const image = new Image();
@@ -93,7 +93,7 @@ async function checkIfFish(imageData) {
         }
       }
 
-      if (points.length < 80) return resolve(false); // วาดน้อยเกิน
+      if (points.length < 50) return resolve(false); // วาดน้อยเกิน
 
       const xs = points.map(p => p.x);
       const ys = points.map(p => p.y);
@@ -102,21 +102,19 @@ async function checkIfFish(imageData) {
       const width = maxX - minX;
       const height = maxY - minY;
 
-      // ✅ เกณฑ์ปลา
+      // ✅ ตรวจสัดส่วนปลา: ยาวกว่ากว้างเล็กน้อย
       const ratio = width / height;
-      if (ratio < 1.5 || ratio > 3.5) return resolve(false);
+      if (ratio < 1.2 || ratio > 4.0) return resolve(false);
+
+      // ✅ ตรวจความหนาแน่น (กันวาดมั่ว)
       const density = points.length / (width * height);
-      if (density < 0.02 || density > 0.35) return resolve(false);
+      if (density < 0.01 || density > 0.5) return resolve(false);
 
-      let lineChanges = 0;
-      let prevX = points[0].x;
-      for (let i = 1; i < points.length; i++) {
-        const dx = Math.abs(points[i].x - prevX);
-        if (dx > 15) lineChanges++;
-        prevX = points[i].x;
-      }
-      if (lineChanges > 40) return resolve(false);
+      // ✅ ตรวจว่ารูปไม่กระจายเป็นเส้น ๆ หลายจุด (มั่ว)
+      let verticalVar = ys.reduce((a, b) => a + Math.pow(b - (minY + height / 2), 2), 0) / ys.length;
+      if (verticalVar > (height * height) / 3) return resolve(false);
 
+      // ✅ ผ่านทั้งหมด = ถือว่าเป็นปลา
       resolve(true);
     };
   });
