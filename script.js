@@ -37,7 +37,7 @@ function draw(x,y){
   if(!drawing) return;
   ctx.lineTo(x,y);
   ctx.strokeStyle=currentColor;
-  ctx.lineWidth=5;
+  ctx.lineWidth=8;
   ctx.lineCap='round';
   ctx.stroke();
 }
@@ -52,18 +52,17 @@ let fishList=[];
 function addFishToAquarium(imageData){
   if(fishList.length>=15){ fishList[0].remove(); fishList.shift(); }
   const fish=document.createElement('img');
-  fish.src=imageData; fish.classList.add('fish');
-  const seaTop=60, seaHeight=25;
+  fish.src=imageData;
+  fish.classList.add('fish');
+  fish.style.width = '120px'; // ✅ ปลาตัวใหญ่ขึ้นคูณสอง
+
+  const seaTop=60, seaHeight=25; // ปลาว่ายเฉพาะในน้ำ
   fish.style.top=seaTop+Math.random()*seaHeight+'%';
   fish.style.left=Math.random()*60+'%';
   fish.style.animationDuration=(8+Math.random()*4)+'s';
+
   fishContainer.appendChild(fish);
   fishList.push(fish);
-}
-function saveFish(imageData){
-  let myFish=JSON.parse(localStorage.getItem('myFish'))||[];
-  myFish.push(imageData);
-  localStorage.setItem('myFish',JSON.stringify(myFish));
 }
 
 // View fish
