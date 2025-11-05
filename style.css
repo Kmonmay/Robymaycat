@@ -69,6 +69,9 @@ canvas {
   background-color: #f9fcff;
   cursor: crosshair;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  touch-action: none;   /* ✅ ป้องกัน Safari zoom/pan */
+  -webkit-user-select: none; /* ป้องกันการเลือกข้อความตอนวาด */
+  -ms-touch-action: none;
 }
 button {
   background:#cce6ff; border:none; border-radius:15px;
