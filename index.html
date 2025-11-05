@@ -21,15 +21,15 @@
   </section>
 
   <main>
-<div class="color-picker">
-  <label>Select color:</label>
-  <button class="color-btn pink" data-color="#ff91a4"></button>
-  <button class="color-btn yellow" data-color="#ffd966"></button>
-  <button class="color-btn green" data-color="#7ed957"></button>
-  <button class="color-btn brown" data-color="#a67b5b"></button>
-  <button class="color-btn red" data-color="#ff4d4d"></button>
-  <button class="color-btn black" data-color="#000000"></button>
-</div>
+    <div class="color-picker">
+      <label>Select color:</label>
+      <button class="color-btn pink" data-color="#ff91a4"></button>
+      <button class="color-btn yellow" data-color="#ffd966"></button>
+      <button class="color-btn green" data-color="#7ed957"></button>
+      <button class="color-btn brown" data-color="#a67b5b"></button>
+      <button class="color-btn red" data-color="#ff4d4d"></button>
+      <button class="color-btn black" data-color="#000000"></button>
+    </div>
 
     <div class="draw-area">
       <canvas id="drawCanvas" width="400" height="300"></canvas>
@@ -39,13 +39,14 @@
         <button id="viewBtn">🐠 View My Fish</button>
       </div>
     </div>
+
+    <div class="cat-reaction">
+      <img id="cat" src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="cat">
+      <img id="catEw" src="https://cdn-icons-png.flaticon.com/512/616/616554.png" alt="cat ew" style="display:none;">
+      <div id="reactionText"></div>
+      <div id="bubbles"></div>
+    </div>
   </main>
-<div class="cat-reaction">
-  <img id="cat" src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="cute cat">
-  <img id="catEw" src="https://cdn-icons-png.flaticon.com/512/616/616554.png" alt="cat ew face" style="display:none;">
-  <div id="reactionText"></div>
-  <div id="bubbles"></div>
-</div>
 
   <div id="fishListModal" class="modal">
     <div class="modal-content">
@@ -59,14 +60,11 @@
     <p>Made with 💙 by Robymaycat</p>
   </footer>
 
+  <!-- Background music -->
+  <audio id="bgMusic" autoplay loop>
+    <source src="music.mp3" type="audio/mpeg">
+  </audio>
+
   <script src="script.js"></script>
-  <!-- 🎵 Background Music -->
-<audio id="bgMusic" autoplay loop>
-  <source src="music.mp3" type="audio/mpeg">
-</audio>
-
-<script src="script.js"></script>
-</body>
-
 </body>
 </html>
