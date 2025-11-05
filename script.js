@@ -138,7 +138,7 @@ document.getElementById('feedBtn').addEventListener('click',async()=>{
 // Check fish (medium difficulty)
 async function checkIfFish(imageData){
   const API_URL="https://api-inference.huggingface.co/models/cafeai/sketch-image-classification";
-  const TOKEN="hf_your_api_token_here";
+  const TOKEN="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";
 
   let aiSaysFish=false;
   try{
