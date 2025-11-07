@@ -4,11 +4,20 @@
   let drawing = false;
   let currentColor = "#000000";
 
-  // ✅ วาดได้ทั้งคอมและมือถือ
+  // 🎨 ระบบวาด
   canvas.addEventListener("mousedown", (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
-  canvas.addEventListener("mousemove", (e) => { if (drawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.strokeStyle = currentColor; ctx.lineWidth = 6; ctx.lineCap = "round"; ctx.stroke(); }});
+  canvas.addEventListener("mousemove", (e) => {
+    if (!drawing) return;
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.strokeStyle = currentColor;
+    ctx.lineWidth = 6;
+    ctx.lineCap = "round";
+    ctx.stroke();
+  });
   canvas.addEventListener("mouseup", () => drawing = false);
   canvas.addEventListener("mouseleave", () => drawing = false);
+
+  // 📱 รองรับมือถือ
   canvas.addEventListener("touchstart", (e) => {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
@@ -40,7 +49,7 @@
 
   document.getElementById("clearBtn").addEventListener("click", () => ctx.clearRect(0, 0, canvas.width, canvas.height));
 
-  // 🧠 ตรวจว่าคล้ายปลา
+  // 🧠 ตรวจว่ารูปคล้ายปลา (ระดับพอดี)
   async function checkIfFish(imageData) {
     return new Promise(resolve => {
       const img = new Image();
@@ -53,9 +62,11 @@
         tctx.drawImage(img, 0, 0);
         const d = tctx.getImageData(0, 0, tmp.width, tmp.height);
         const points = [];
-        for (let y = 0; y < tmp.height; y++) for (let x = 0; x < tmp.width; x++) {
-          const a = d.data[(y * tmp.width + x) * 4 + 3];
-          if (a > 100) points.push({ x, y });
+        for (let y = 0; y < tmp.height; y++) {
+          for (let x = 0; x < tmp.width; x++) {
+            const a = d.data[(y * tmp.width + x) * 4 + 3];
+            if (a > 100) points.push({ x, y });
+          }
         }
         if (points.length < 150) return resolve(false);
         const xs = points.map(p => p.x);
@@ -66,6 +77,7 @@
     });
   }
 
+  // 🌊 ส่วนจัดการปลาในจอ
   const fishContainer = document.getElementById("fishContainer");
 
   function addFishToAquarium(imageData) {
@@ -88,7 +100,7 @@
       setTimeout(swim, duration);
     }
 
-    // 🩵 แตะแล้วว่ายเร็ว
+    // 🩵 แตะแล้วว่ายเร็วขึ้น
     fish.addEventListener("click", () => {
       fish.style.transition = `top 2000ms ease-in-out, left 2000ms ease-in-out, transform 0.5s ease`;
       const randomX = 10 + Math.random() * 80;
@@ -101,11 +113,44 @@
     setTimeout(swim, 1000 + Math.random() * 2000);
   }
 
-  document.getElementById("feedBtn").addEventListener("click", async () => {
-    const img = canvas.toDataURL("image/png");
-    const isFish = await checkIfFish(img);
-    if (!isFish) { alert("That’s not a fish 🐱💬"); return; }
-    addFishToAquarium(img);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  });
+  // 🌍 เชื่อมต่อ Firebase (Public Aquarium)
+  if (window.db) {
+    console.log("✅ Firebase connected successfully");
+    const db = window.db;
+    const dbRef = window.firebaseRef(db, "fishes");
+
+    // 🐟 อัปโหลดปลา
+    async function uploadFish(imageData) {
+      try {
+        const fishData = { image: imageData, time: Date.now(), user: navigator.userAgent };
+        await window.firebasePush(dbRef, fishData);
+        console.log("✅ Fish uploaded successfully");
+      } catch (err) {
+        console.error("❌ Upload failed:", err);
+      }
+    }
+
+    // 🐠 โหลดปลาทั้งหมดแบบ realtime
+    const queryRef = window.firebaseQuery(dbRef, window.firebaseLimit(30));
+    window.firebaseOnValue(queryRef, (snapshot) => {
+      const data = snapshot.val();
+      fishContainer.innerHTML = "";
+      if (!data) return;
+      Object.values(data).forEach(f => addFishToAquarium(f.image));
+      console.log("🐟 Loaded", Object.keys(data).length, "fish from Firebase");
+    });
+
+    // 🍽️ ปุ่ม Feed (อัปโหลดปลา)
+    document.getElementById("feedBtn").addEventListener("click", async () => {
+      const img = canvas.toDataURL("image/png");
+      const isFish = await checkIfFish(img);
+      if (!isFish) {
+        alert("That’s not a fish 🐱💬");
+        return;
+      }
+      addFishToAquarium(img);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      await uploadFish(img); // ✅ แชร์ขึ้นฐานข้อมูลให้คนอื่นเห็น
+    });
+  }
 })();
