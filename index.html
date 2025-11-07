@@ -12,9 +12,10 @@
 <body>
   <header>
     <h1>Robymaycat</h1>
-    <p class="subtitle">You can feed my little cat. Just drawing your fish :)</p>
+    <p class="subtitle">You can feed my little cat. Just draw your fish 🎨</p>
   </header>
 
+  <!-- 🐟 Aquarium Area -->
   <section class="hero">
     <div class="aquarium">
       <video src="robymaycat-intro.mp4" playsinline muted autoplay loop preload="metadata"></video>
@@ -22,7 +23,73 @@
     </div>
   </section>
 
+  <!-- ✏️ Drawing Section -->
   <main>
-    <div class="color-picker">
-      <label>Select color:</label>
-      <button class="color-btn
+    <div class="draw-area">
+      <h2>🎨 Draw Your Fish</h2>
+      <div class="color-picker">
+        <label>Select color:</label>
+        <div class="color-row">
+          <button class="color-btn pink" data-color="#ff91a4"></button>
+          <button class="color-btn yellow" data-color="#ffd966"></button>
+          <button class="color-btn green" data-color="#7ed957"></button>
+          <button class="color-btn brown" data-color="#a67b5b"></button>
+          <button class="color-btn red" data-color="#ff4d4d"></button>
+          <button class="color-btn black" data-color="#000000"></button>
+        </div>
+      </div>
+
+      <canvas id="drawCanvas" width="400" height="300"></canvas>
+
+      <div class="buttons">
+        <button id="clearBtn">🧼 Clear</button>
+        <button id="feedBtn">🍽️ Feed</button>
+      </div>
+    </div>
+
+    <div class="reaction-area">
+      <div id="reactionText"></div>
+      <div id="bubbles"></div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Made with 💙 by Robymaycat</p>
+  </footer>
+
+  <!-- Background music -->
+  <audio id="bgMusic" autoplay loop>
+    <source src="music.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- ✅ Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getDatabase, ref, push, onValue, query, limitToLast } 
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwJ__tUXNhDhuyfEH4nxf1DoiAeiMA20o",
+      authDomain: "robymaycat.firebaseapp.com",
+      databaseURL: "https://robymaycat-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "robymaycat",
+      storageBucket: "robymaycat.appspot.com",
+      messagingSenderId: "902678070279",
+      appId: "1:902678070279:web:c3f054e2b43ec0b7c916a2",
+      measurementId: "G-RHCWLERB37"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    window.db = db;
+    window.firebaseRef = ref;
+    window.firebasePush = push;
+    window.firebaseOnValue = onValue;
+    window.firebaseQuery = query;
+    window.firebaseLimit = limitToLast;
+    console.log("✅ Firebase initialized");
+  </script>
+
+  <script src="script.js"></script>
+</body>
+</html>
