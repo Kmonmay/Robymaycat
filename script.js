@@ -58,49 +58,80 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
 
-  async function checkIfFish(imageData) {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.src = imageData;
-      img.onload = () => {
-        const tmp = document.createElement("canvas");
-        const tctx = tmp.getContext("2d");
-        tmp.width = img.width;
-        tmp.height = img.height;
-        tctx.drawImage(img, 0, 0);
-        const d = tctx.getImageData(0, 0, tmp.width, tmp.height);
-        const points = [];
-        for (let y = 0; y < tmp.height; y++) {
-          for (let x = 0; x < tmp.width; x++) {
-            const a = d.data[(y * tmp.width + x) * 4 + 3];
-            if (a > 100) points.push({ x, y });
-          }
+  // 🧠 ตรวจว่ารูปคล้ายปลา (ฉลาดพอดี เวอร์ชันสมดุล)
+async function checkIfFish(imageData) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = imageData;
+    img.onload = () => {
+      const tmp = document.createElement("canvas");
+      const tctx = tmp.getContext("2d");
+      tmp.width = img.width;
+      tmp.height = img.height;
+      tctx.drawImage(img, 0, 0);
+      const d = tctx.getImageData(0, 0, tmp.width, tmp.height);
+
+      const points = [];
+      for (let y = 0; y < tmp.height; y++) {
+        for (let x = 0; x < tmp.width; x++) {
+          const a = d.data[(y * tmp.width + x) * 4 + 3];
+          if (a > 100) points.push({ x, y });
         }
-        if (points.length < 60) return resolve(false);
-        const xs = points.map((p) => p.x);
-        const ys = points.map((p) => p.y);
-        const w = Math.max(...xs) - Math.min(...xs);
-        const h = Math.max(...ys) - Math.min(...ys);
-        const ratio = w / h;
-        const density = points.length / (w * h);
-        if (ratio < 1.1 || ratio > 4.5) return resolve(false);
-        if (density < 0.01 || density > 0.5) return resolve(false);
-        resolve(true);
-      };
-    });
-  }
+      }
+
+      if (points.length < 150) return resolve(false); // ต้องมีเส้นเพียงพอ
+
+      const xs = points.map(p => p.x);
+      const ys = points.map(p => p.y);
+      const w = Math.max(...xs) - Math.min(...xs);
+      const h = Math.max(...ys) - Math.min(...ys);
+      const ratio = w / h;
+      const density = points.length / (w * h);
+
+      // ✅ เงื่อนไข "สมดุล" สำหรับรูปร่างปลา
+      // ยาวกว่าเล็กน้อย, ไม่หนาแน่นเกินไป, มีความต่อเนื่อง
+      if (ratio < 1.3 || ratio > 3.5) return resolve(false);
+      if (density < 0.02 || density > 0.25) return resolve(false);
+
+      // ✅ ตรวจสอบความต่อเนื่อง (ไม่กระจายเป็นหลายก้อน)
+      const avgY = ys.reduce((a, b) => a + b, 0) / ys.length;
+      const varianceY = ys.reduce((a, b) => a + Math.pow(b - avgY, 2), 0) / ys.length;
+      const continuity = Math.sqrt(varianceY) / h;
+      if (continuity > 0.45) return resolve(false);
+
+      resolve(true);
+    };
+  });
+}
 
   const fishContainer = document.getElementById("fishContainer");
-  function addFishToAquarium(imageData) {
-    const fish = document.createElement("img");
-    fish.src = imageData;
-    fish.classList.add("fish");
-    fish.style.width = "120px";
-    fish.style.top = 60 + Math.random() * 25 + "%";
-    fish.style.left = Math.random() * 60 + "%";
-    fish.style.animationDuration = (8 + Math.random() * 4) + "s";
-    fishContainer.appendChild(fish);
-  }
+ // 🐟 เพิ่มปลาในตู้ (ว่ายจากขวา → ซ้าย)
+function addFishToAquarium(imageData) {
+  const fish = document.createElement("img");
+  fish.src = imageData;
+  fish.classList.add("fish");
+  fish.style.position = "absolute";
+  fish.style.width = "120px";
+  fish.style.top = 60 + Math.random() * 25 + "%";
+  fish.style.left = "110%"; // เริ่มนอกจอด้านขวา
+  fish.style.transform = "scaleX(-1)"; // หันไปทางซ้าย
+
+  fishContainer.appendChild(fish);
+
+  // 🩵 ให้ปลาค่อย ๆ ว่ายข้ามจอแบบสมจริง
+  const duration = 10000 + Math.random() * 6000; // 10–16 วินาที
+  fish.animate(
+    [
+      { transform: "translateX(0) scaleX(-1)", left: "110%" },
+      { transform: "translateX(-120vw) scaleX(-1)", left: "-20%" }
+    ],
+    {
+      duration: duration,
+      iterations: Infinity,
+      easing: "linear"
+    }
+  );
+}
 
   function showReaction(text) {
     const el = document.getElementById("reactionText");
