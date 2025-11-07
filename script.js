@@ -115,65 +115,50 @@ function addFishToAquarium(imageData) {
   fish.src = imageData;
   fish.classList.add("fish");
   fish.style.position = "absolute";
-  fish.style.width = 80 + Math.random() * 60 + "px"; // ขนาดต่างกัน
-  fish.style.top = 40 + Math.random() * 40 + "%"; // กระจายตำแหน่งแนวตั้ง
-  fish.style.left = 10 + Math.random() * 70 + "%"; // เริ่มตรงไหนก็ได้
+  fish.style.width = 80 + Math.random() * 60 + "px";
+  fish.style.top = 30 + Math.random() * 50 + "%";
+  fish.style.left = 10 + Math.random() * 70 + "%";
   fish.style.opacity = 0.9;
-  fish.style.transition = "transform 1s linear";
   fishContainer.appendChild(fish);
 
-  // 🐠 ฟังก์ชันว่ายไปมาแบบสุ่ม
   function swim() {
-    const randomX = 10 + Math.random() * 80; // %
-    const randomY = 40 + Math.random() * 40; // %
-    const duration = 6000 + Math.random() * 4000; // 6–10 วินาที
+    const randomX = 10 + Math.random() * 80;
+    const randomY = 30 + Math.random() * 50;
+    const duration = 7000 + Math.random() * 5000;
     const flip = Math.random() < 0.5 ? "scaleX(1)" : "scaleX(-1)";
 
-    // ใช้ CSS transition เดินทางอย่างลื่น
     fish.style.transition = `top ${duration}ms ease-in-out, left ${duration}ms ease-in-out, transform 1s ease`;
     fish.style.top = `${randomY}%`;
     fish.style.left = `${randomX}%`;
     fish.style.transform = flip;
 
-    // สั่งให้มันว่ายต่อเนื่อง
+    // 🫧 เพิ่มฟองตอนเปลี่ยนทิศ
+    if (Math.random() > 0.6) spawnTinyBubble(fish);
+
     setTimeout(swim, duration);
   }
 
-  // เริ่มว่ายหลังเพิ่มลง DOM
+  function spawnTinyBubble(fish) {
+    const bubble = document.createElement("div");
+    bubble.classList.add("bubble");
+    bubble.style.position = "absolute";
+    bubble.style.width = bubble.style.height = 4 + Math.random() * 6 + "px";
+    bubble.style.left = fish.style.left;
+    bubble.style.top = fish.style.top;
+    bubble.style.backgroundColor = "rgba(173,216,230,0.6)";
+    fishContainer.appendChild(bubble);
+
+    bubble.animate(
+      [{ transform: "translateY(0)", opacity: 1 }, { transform: "translateY(-40px)", opacity: 0 }],
+      { duration: 2000, easing: "ease-out", fill: "forwards" }
+    );
+
+    setTimeout(() => bubble.remove(), 2000);
+  }
+
   setTimeout(swim, 1000 + Math.random() * 2000);
 }
 
-
-  function showReaction(text) {
-    const el = document.getElementById("reactionText");
-    el.textContent = text;
-    el.style.opacity = 1;
-    setTimeout(() => (el.style.opacity = 0), 2000);
-  }
-
-  function spawnBubbles() {
-    const c = document.getElementById("bubbles");
-    for (let i = 0; i < 6; i++) {
-      const b = document.createElement("div");
-      b.classList.add("bubble");
-      b.style.width = b.style.height = 8 + Math.random() * 10 + "px";
-      b.style.left = Math.random() * 100 + "%";
-      c.appendChild(b);
-      setTimeout(() => b.remove(), 3000);
-    }
-  }
-
-  function spawnBubblePop() {
-    const c = document.getElementById("bubbles");
-    for (let i = 0; i < 6; i++) {
-      const b = document.createElement("div");
-      b.classList.add("pop-bubble");
-      b.style.width = b.style.height = 12 + Math.random() * 14 + "px";
-      b.style.left = Math.random() * 100 + "%";
-      c.appendChild(b);
-      setTimeout(() => b.remove(), 800);
-    }
-  }
 
   // 🌊 Firebase (Public Aquarium)
   if (window.db) {
