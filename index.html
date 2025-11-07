@@ -66,27 +66,29 @@
 
   <!-- ✅ Firebase SDK Integration -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getDatabase, ref, push, onValue, limitToLast } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getDatabase, ref, push, onValue, limitToLast } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDwJ__tUXNhDhuyfEH4nxf1DoiAeiMA20o",
-  authDomain: "robymaycat.firebaseapp.com",
-  databaseURL: "https://robymaycat-default-rtdb.asia-southeast1.firebasedatabase.app", // ✅ เพิ่มบรรทัดนี้
-  projectId: "robymaycat",
-  storageBucket: "robymaycat.firebasestorage.app",
-  messagingSenderId: "902678070279",
-  appId: "1:902678070279:web:c3f054e2b43ec0b7c916a2",
-  measurementId: "G-RHCWLERB37"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyDwJ__tUXNhDhuyfEH4nxf1DoiAeiMA20o",
+    authDomain: "robymaycat.firebaseapp.com",
+    databaseURL: "https://robymaycat-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "robymaycat",
+    storageBucket: "robymaycat.firebasestorage.app",
+    messagingSenderId: "902678070279",
+    appId: "1:902678070279:web:c3f054e2b43ec0b7c916a2",
+    measurementId: "G-RHCWLERB37"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    window.db = db;
-    window.firebaseRef = ref;
-    window.firebasePush = push;
-    window.firebaseOnValue = onValue;
-    window.firebaseLimit = limitToLast;
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  window.db = db;
+  window.firebaseRef = ref;
+  window.firebasePush = push;
+  window.firebaseOnValue = onValue;
+  window.firebaseLimit = limitToLast;
+</script>
+  
     // ✅ ตรวจว่าเชื่อม Firebase ได้จริงไหม
 try {
   const testRef = ref(db, "connection_test");
