@@ -16,14 +16,12 @@
   </header>
 
   <!-- 🐟 Aquarium -->
-<section class="hero">
-  <div class="aquarium">
-    <video src="robymaycat-intro.mp4" playsinline muted autoplay loop></video>
-    <div id="fishContainer"></div>
-  </div>
-</section>
-
-<!-- ✅ ย้ายออกมานอก aquarium -->
+  <section class="hero">
+    <div class="aquarium">
+      <video src="robymaycat-intro.mp4" playsinline muted autoplay loop></video>
+      <div id="fishContainer"></div>
+    </div>
+  </section>
 
   <!-- ✏️ Drawing Section -->
   <main>
@@ -41,7 +39,8 @@
         </div>
       </div>
 
-     <canvas id="drawCanvas" width="400" height="300"></canvas>
+      <!-- ✅ ใช้เพียง canvas ตัวเดียว -->
+      <canvas id="drawCanvas" width="400" height="300"></canvas>
 
       <div class="buttons">
         <button id="clearBtn">🧼 Clear</button>
@@ -59,41 +58,41 @@
     <p>Made with 💙 by Robymaycat</p>
   </footer>
 
-  <!-- Background Music -->
+  <!-- 🎵 Background Music -->
   <audio id="bgMusic" autoplay loop>
     <source src="music.mp3" type="audio/mpeg">
   </audio>
 
   <!-- ✅ Firebase SDK -->
   <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-  import { getDatabase, ref, push, onValue, query, limitToLast }
-    from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getDatabase, ref, push, onValue, query, limitToLast }
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDwJ__tUXNhDhuyfEH4nxf1DoiAeiMA20o",
-    authDomain: "robymaycat.firebaseapp.com",
-    databaseURL: "https://robymaycat-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "robymaycat",
-    storageBucket: "robymaycat.appspot.com",
-    messagingSenderId: "902678070279",
-    appId: "1:902678070279:web:c3f054e2b43ec0b7c916a2",
-    measurementId: "G-RHCWLERB37"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwJ__tUXNhDhuyfEH4nxf1DoiAeiMA20o",
+      authDomain: "robymaycat.firebaseapp.com",
+      databaseURL: "https://robymaycat-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "robymaycat",
+      storageBucket: "robymaycat.appspot.com",
+      messagingSenderId: "902678070279",
+      appId: "1:902678070279:web:c3f054e2b43ec0b7c916a2",
+      measurementId: "G-RHCWLERB37"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-  // ✅ ให้แน่ใจว่า db ถูกตั้งไว้ก่อน script.js เริ่ม
-  window.db = db;
-  window.firebaseRef = ref;
-  window.firebasePush = push;
-  window.firebaseOnValue = onValue;
-  window.firebaseQuery = query;
-  window.firebaseLimit = limitToLast;
+    // ✅ ให้แน่ใจว่า db ถูกตั้งไว้ก่อน script.js เริ่ม
+    window.db = db;
+    window.firebaseRef = ref;
+    window.firebasePush = push;
+    window.firebaseOnValue = onValue;
+    window.firebaseQuery = query;
+    window.firebaseLimit = limitToLast;
 
-  // ✅ โหลด script.js หลังจาก db พร้อมแล้ว
-  import("./script.js").then(() => console.log("🎨 Script.js loaded after Firebase!"));
-</script>
+    // ✅ โหลด script.js หลังจาก db พร้อมแล้ว
+    import("./script.js").then(() => console.log("🎨 Script.js loaded after Firebase!"));
+  </script>
 </body>
 </html>
