@@ -163,49 +163,76 @@
     }
   }
 
-  // 🌊 Firebase (Public Aquarium)
-  if (window.db) {
-    console.log("✅ Firebase connected, syncing fish...");
-    const dbRef = window.firebaseRef(window.db, "fishes");
+// 🌊 Firebase (Public Aquarium)
+if (window.db) {
+  console.log("✅ Firebase connected, syncing fish...");
 
-    // 🐟 อัปโหลดปลา
-    async function uploadFish(imageData) {
-      try {
-        await window.firebasePush(dbRef, {
-          image: imageData,
-          time: Date.now(),
-        });
-        console.log("✅ Fish uploaded to Firebase");
-      } catch (err) {
-        console.error("❌ Upload failed:", err);
-      }
+  const dbRef = window.firebaseRef(window.db, "fishes");
+
+  // 🐟 อัปโหลดปลาไป Firebase
+  async function uploadFish(imageData) {
+    try {
+      await window.firebasePush(dbRef, {
+        image: imageData,
+        time: Date.now(),
+      });
+      console.log("✅ Fish uploaded to Firebase");
+    } catch (err) {
+      console.error("❌ Upload failed:", err);
+    }
+  }
+
+  // 🐠 ดึงข้อมูลปลาจาก Firebase แบบ Realtime
+  const fishQuery = window.firebaseQuery(dbRef, window.firebaseLimit(30));
+
+  window.firebaseOnValue(fishQuery, (snapshot) => {
+    const data = snapshot.val();
+    if (!data) {
+      console.log("🐾 No fish yet");
+      return;
     }
 
-    // 🐠 โหลดปลาจาก Firebase แบบ realtime
-    const queryRef = window.firebaseLimit(dbRef, 20);
-    window.firebaseOnValue(queryRef, (snapshot) => {
-      const data = snapshot.val();
-      if (!data) {
-        console.log("🐾 No fish data yet");
-        return;
-      }
+    // ล้างของเก่า
+    fishContainer.innerHTML = "";
 
-      fishContainer.innerHTML = "";
-      Object.values(data).forEach((fish) => {
-        const fishImg = document.createElement("img");
-        fishImg.src = fish.image;
-        fishImg.classList.add("fish");
-        fishImg.style.width = "120px";
-        fishImg.style.top = 60 + Math.random() * 25 + "%";
-        fishImg.style.left = Math.random() * 60 + "%";
-        fishImg.style.animationDuration = (8 + Math.random() * 4) + "s";
-        fishContainer.appendChild(fishImg);
-      });
-      console.log("🐟 Fish loaded:", Object.keys(data).length);
+    // สร้างปลาจาก Firebase
+    const fishes = Object.values(data);
+    fishes.forEach((fish) => {
+      const fishImg = document.createElement("img");
+      fishImg.src = fish.image;
+      fishImg.classList.add("fish");
+      fishImg.style.width = "120px";
+      fishImg.style.top = 60 + Math.random() * 25 + "%";
+      fishImg.style.left = Math.random() * 60 + "%";
+      fishImg.style.animationDuration = (8 + Math.random() * 4) + "s";
+      fishContainer.appendChild(fishImg);
     });
 
-    window.saveFish = uploadFish;
-  }
+    // ✅ แสดง debug count มุมขวาล่าง
+    const counter = document.getElementById("fishCounter") || document.createElement("div");
+    counter.id = "fishCounter";
+    counter.textContent = `🐠 ${fishes.length} fish in aquarium`;
+    Object.assign(counter.style, {
+      position: "fixed",
+      bottom: "15px",
+      right: "15px",
+      background: "#4da6ff",
+      color: "white",
+      padding: "8px 14px",
+      borderRadius: "12px",
+      fontSize: "0.9rem",
+      fontWeight: "bold",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+      zIndex: 9999
+    });
+    document.body.appendChild(counter);
+
+    console.log(`🐟 Loaded ${fishes.length} fish from Firebase`);
+  });
+
+  window.saveFish = uploadFish;
+}
+
 
   // 🎵 เพลงพื้นหลัง
   const bg = document.getElementById("bgMusic");
