@@ -16,12 +16,22 @@
   </header>
 
   <!-- 🐟 Aquarium -->
-  <section class="hero">
-    <div class="aquarium">
-      <video src="robymaycat-intro.mp4" playsinline muted autoplay loop preload="metadata"></video>
-      <div id="fishContainer"></div>
-    </div>
-  </section>
+<section class="hero">
+  <div class="aquarium">
+    <video src="robymaycat-intro.mp4" playsinline muted autoplay loop></video>
+    <div id="fishContainer"></div>
+  </div>
+</section>
+
+<!-- ✅ ย้ายออกมานอก aquarium -->
+<main>
+  <canvas id="drawCanvas" width="400" height="300"></canvas>
+  <div class="buttons">
+    <button id="clearBtn">🧼 Clear</button>
+    <button id="feedBtn">🍽️ Feed</button>
+  </div>
+</main>
+
 
   <!-- ✏️ Drawing Section -->
   <main>
