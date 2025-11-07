@@ -4,7 +4,6 @@ const ctx = canvas.getContext("2d");
 let drawing = false;
 let currentColor = "#000000";
 
-// ✅ Resize ให้เหมาะกับทุกอุปกรณ์
 function resizeCanvas() {
   const rect = canvas.getBoundingClientRect();
   canvas.width = rect.width;
@@ -13,7 +12,7 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-// 🎨 เปลี่ยนสี
+// 🎨 สี
 document.querySelectorAll(".color-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     currentColor = btn.getAttribute("data-color");
@@ -22,7 +21,7 @@ document.querySelectorAll(".color-btn").forEach(btn => {
   });
 });
 
-// ✏️ วาดเส้น
+// ✏️ วาด
 function startDraw(x, y) { drawing = true; ctx.beginPath(); ctx.moveTo(x, y); }
 function draw(x, y) {
   if (!drawing) return;
@@ -39,27 +38,25 @@ canvas.addEventListener("mousemove", e => draw(e.offsetX, e.offsetY));
 canvas.addEventListener("mouseup", stopDraw);
 canvas.addEventListener("mouseleave", stopDraw);
 
-// 📱 Touch Events
 canvas.addEventListener("touchstart", e => {
   e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
+  const r = canvas.getBoundingClientRect();
   const t = e.touches[0];
-  startDraw(t.clientX - rect.left, t.clientY - rect.top);
+  startDraw(t.clientX - r.left, t.clientY - r.top);
 });
 canvas.addEventListener("touchmove", e => {
   e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
+  const r = canvas.getBoundingClientRect();
   const t = e.touches[0];
-  draw(t.clientX - rect.left, t.clientY - rect.top);
+  draw(t.clientX - r.left, t.clientY - r.top);
 });
 canvas.addEventListener("touchend", stopDraw);
 
-// 🧼 Clear
 document.getElementById("clearBtn").addEventListener("click", () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
 
-// 🧠 ตรวจว่ารูปคล้ายปลา (เวอร์ชันเบา)
+// 🧠 ตรวจว่าเป็นปลาหรือไม่ (เวอร์ชันเบา)
 async function checkIfFish(imageData) {
   return new Promise(resolve => {
     const img = new Image();
@@ -85,14 +82,14 @@ async function checkIfFish(imageData) {
       const h = Math.max(...ys) - Math.min(...ys);
       const ratio = w / h;
       const density = points.length / (w * h);
-      if (ratio < 1.1 || ratio > 4.5) return resolve(false);
-      if (density < 0.01 || density > 0.5) return resolve(false);
+      if (ratio < 0.8 || ratio > 5.5) return resolve(false);
+      if (density < 0.005 || density > 0.6) return resolve(false);
       resolve(true);
     };
   });
 }
 
-// 🍽️ Feed Button
+// 🍽️ Feed
 document.getElementById("feedBtn").addEventListener("click", async () => {
   const img = canvas.toDataURL("image/png");
   const isFish = await checkIfFish(img);
@@ -110,7 +107,7 @@ document.getElementById("feedBtn").addEventListener("click", async () => {
   if (window.saveFish) window.saveFish(img);
 });
 
-// 🐟 เพิ่มปลาในตู้
+// 🐟 แสดงปลาในตู้
 const fishContainer = document.getElementById("fishContainer");
 function addFishToAquarium(imageData) {
   const fish = document.createElement("img");
@@ -123,7 +120,7 @@ function addFishToAquarium(imageData) {
   fishContainer.appendChild(fish);
 }
 
-// 💬 Reaction
+// 💬 ข้อความ
 function showReaction(text) {
   const el = document.getElementById("reactionText");
   el.textContent = text;
@@ -131,7 +128,7 @@ function showReaction(text) {
   setTimeout(() => (el.style.opacity = 0), 2000);
 }
 
-// 🫧 เอฟเฟกต์ฟอง
+// 🫧 ฟอง
 function spawnBubbles() {
   const c = document.getElementById("bubbles");
   for (let i = 0; i < 6; i++) {
@@ -155,25 +152,29 @@ function spawnBubblePop() {
   }
 }
 
-// 🌊 Firebase Share (Public Aquarium)
+// 🌊 Firebase (Public Aquarium)
 if (window.db) {
-  const dbRef = window.firebaseRef(window.db, "fishes");
+  console.log("✅ Firebase ready");
+
+  const dbRef = window.firebaseQuery(window.firebaseRef(window.db, "fishes"), window.firebaseLimit(15));
+
   async function uploadFish(imageData) {
-    await window.firebasePush(dbRef, { image: imageData, time: Date.now() });
+    await window.firebasePush(window.firebaseRef(window.db, "fishes"), {
+      image: imageData,
+      time: Date.now()
+    });
   }
-import { onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-const dbRef = query(window.firebaseRef(window.db, "fishes"), limitToLast(15));
+  window.firebaseOnValue(dbRef, snapshot => {
+    const data = snapshot.val();
+    if (!data) return;
+    fishContainer.innerHTML = "";
+    Object.values(data).forEach(fish => addFishToAquarium(fish.image));
+  });
 
-onValue(dbRef, snapshot => {
-  const data = snapshot.val();
-  if (!data) return;
-  fishContainer.innerHTML = "";
-  Object.values(data).forEach(fish => addFishToAquarium(fish.image));
-});
+  window.saveFish = uploadFish;
+}
 
-
-// 🎵 Background Music Volume
 const bg = document.getElementById("bgMusic");
 if (bg) bg.volume = 0.3;
 
