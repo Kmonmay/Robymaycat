@@ -154,26 +154,25 @@ function spawnBubblePop() {
 
 // 🌊 Firebase (Public Aquarium)
 if (window.db) {
-  console.log("✅ Firebase connected! Preparing fish sync...");
+  console.log("✅ Firebase connected, syncing fish...");
 
-  // อ้างอิงตำแหน่ง fishes ในฐานข้อมูล
   const dbRef = window.firebaseRef(window.db, "fishes");
 
-  // 🐟 ฟังก์ชันอัปโหลดปลาไป Firebase
+  // 🐟 อัปโหลดปลาที่วาดขึ้น Firebase
   async function uploadFish(imageData) {
     try {
       await window.firebasePush(dbRef, {
         image: imageData,
-        time: Date.now(),
+        time: Date.now()
       });
-      console.log("✅ Fish uploaded to Firebase!");
+      console.log("✅ Fish uploaded to Firebase");
     } catch (err) {
       console.error("❌ Upload failed:", err);
     }
   }
 
-  // 🐠 โหลดปลาทั้งหมดแบบเรียลไทม์
-  const queryRef = window.firebaseLimit(dbRef, 15); // ดึงปลาล่าสุด 15 ตัว
+  // 🐠 โหลดปลาจาก Firebase แบบเรียลไทม์
+  const queryRef = window.firebaseLimit(dbRef, 20); // ดึงล่าสุด 20 ตัว
   window.firebaseOnValue(queryRef, (snapshot) => {
     const data = snapshot.val();
     if (!data) {
@@ -181,8 +180,7 @@ if (window.db) {
       return;
     }
 
-    console.log("🐟 Loading fish from Firebase:", Object.keys(data).length);
-    fishContainer.innerHTML = "";
+    fishContainer.innerHTML = ""; // ล้างก่อนแสดงใหม่
     Object.values(data).forEach((fish) => {
       const fishImg = document.createElement("img");
       fishImg.src = fish.image;
@@ -193,8 +191,10 @@ if (window.db) {
       fishImg.style.animationDuration = (8 + Math.random() * 4) + "s";
       fishContainer.appendChild(fishImg);
     });
+
+    console.log("🐟 Fish loaded:", Object.keys(data).length);
   });
 
-  // เก็บไว้ให้ปุ่ม Feed เรียกใช้งาน
+  // ให้ปุ่ม Feed ใช้งานได้
   window.saveFish = uploadFish;
 }
