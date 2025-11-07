@@ -174,4 +174,67 @@ canvas.addEventListener("touchend", () => drawing = false);
 
       bubble.animate(
         [{ transform: "translateY(0)", opacity: 1 }, { transform: "translateY(-40px)", opacity: 0 }],
-        { du
+                { duration: boosted ? 1500 : 2500, easing: "ease-out", fill: "forwards" }
+      );
+      setTimeout(() => bubble.remove(), boosted ? 1500 : 2500);
+    }
+
+    // 🧲 Event: แตะ/คลิกเพื่อเร่งปลา
+    fish.addEventListener("click", speedBoost);
+    fish.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      speedBoost();
+    });
+
+    // 🏊 เริ่มว่ายหลัง spawn
+    setTimeout(swim, 1000 + Math.random() * 2000);
+  }
+
+  // 🌊 Firebase (Public Aquarium)
+  if (window.db) {
+    console.log("✅ Firebase connected successfully");
+    const db = window.db;
+    const dbRef = window.firebaseRef(db, "fishes");
+    const { query, limitToLast } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js");
+
+    // 🐟 Upload fish
+    async function uploadFish(imageData) {
+      try {
+        const fishData = { image: imageData, time: Date.now(), user: navigator.userAgent };
+        await window.firebasePush(dbRef, fishData);
+        console.log("✅ Fish uploaded successfully");
+      } catch (err) {
+        console.error("❌ Upload failed:", err);
+      }
+    }
+
+    // 🐠 Listen for realtime updates
+    const queryRef = query(dbRef, limitToLast(20));
+    window.firebaseOnValue(queryRef, (snapshot) => {
+      const data = snapshot.val();
+      fishContainer.innerHTML = "";
+      if (!data) return;
+      Object.values(data).forEach((fish) => addFishToAquarium(fish.image));
+    });
+
+    // 🍽️ Feed Button
+    document.getElementById("feedBtn").addEventListener("click", async () => {
+      const img = canvas.toDataURL("image/png");
+      const isFish = await checkIfFish(img);
+      if (!isFish) {
+        showReaction("That’s not a fish… ew! 🐱💬");
+        return;
+      }
+
+      showReaction("Yummy! Thank you for the fish!");
+      addFishToAquarium(img);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      await uploadFish(img);
+    });
+  }
+
+  // 🎵 เพลงพื้นหลัง
+  const bg = document.getElementById("bgMusic");
+  if (bg) bg.volume = 0.3;
+})();
+
