@@ -64,33 +64,34 @@
 
   <!-- ✅ Firebase SDK -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getDatabase, ref, push, onValue, query, limitToLast }
-      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getDatabase, ref, push, onValue, query, limitToLast }
+    from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDwJ__tUXNhDhuyfEH4nxf1DoiAeiMA20o",
-      authDomain: "robymaycat.firebaseapp.com",
-      databaseURL: "https://robymaycat-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "robymaycat",
-      storageBucket: "robymaycat.appspot.com",
-      messagingSenderId: "902678070279",
-      appId: "1:902678070279:web:c3f054e2b43ec0b7c916a2",
-      measurementId: "G-RHCWLERB37"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyDwJ__tUXNhDhuyfEH4nxf1DoiAeiMA20o",
+    authDomain: "robymaycat.firebaseapp.com",
+    databaseURL: "https://robymaycat-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "robymaycat",
+    storageBucket: "robymaycat.appspot.com",
+    messagingSenderId: "902678070279",
+    appId: "1:902678070279:web:c3f054e2b43ec0b7c916a2",
+    measurementId: "G-RHCWLERB37"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-    // ✅ ส่งออกให้ script.js ใช้ได้
-    window.db = db;
-    window.firebaseRef = ref;
-    window.firebasePush = push;
-    window.firebaseOnValue = onValue;
-    window.firebaseQuery = query;
-    window.firebaseLimit = limitToLast;
-  </script>
+  // ✅ ให้แน่ใจว่า db ถูกตั้งไว้ก่อน script.js เริ่ม
+  window.db = db;
+  window.firebaseRef = ref;
+  window.firebasePush = push;
+  window.firebaseOnValue = onValue;
+  window.firebaseQuery = query;
+  window.firebaseLimit = limitToLast;
 
-  <script src="script.js"></script>
+  // ✅ โหลด script.js หลังจาก db พร้อมแล้ว
+  import("./script.js").then(() => console.log("🎨 Script.js loaded after Firebase!"));
+</script>
 </body>
 </html>
