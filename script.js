@@ -116,7 +116,7 @@ function addFishToAquarium(imageData) {
   fish.classList.add("fish");
   fish.style.position = "absolute";
   fish.style.width = 80 + Math.random() * 60 + "px";
-  fish.style.top = 55 + Math.random() * 25 + "%";
+  fish.style.top = 35 + Math.random() * 25 + "%";
   fish.style.left = 10 + Math.random() * 70 + "%";
   fish.style.opacity = 0.9;
   fishContainer.appendChild(fish);
