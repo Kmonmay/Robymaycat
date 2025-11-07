@@ -86,7 +86,7 @@
     setTimeout(swim, 1000);
   }
 
-// 🧠 ตรวจว่ารูปคล้ายปลา (Easy+ Mode)
+// 🧠 ตรวจว่ารูปคล้ายปลา (Super Easy Mode)
 async function checkIfFish(imageData) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -107,36 +107,31 @@ async function checkIfFish(imageData) {
         }
       }
 
-      // 🎯 ต้องวาดพอมีรูปทรง (แต่ไม่ต้องเยอะ)
-      if (points.length < 200) return resolve(false);
+      // 🐟 เงื่อนไขง่ายมาก
+      if (points.length < 120) return resolve(false); // แค่มีเส้นพอประมาณก็ผ่าน
 
       const xs = points.map(p => p.x);
       const ys = points.map(p => p.y);
       const w = Math.max(...xs) - Math.min(...xs);
       const h = Math.max(...ys) - Math.min(...ys);
-      const ratio = w / h;
+      const ratio = w / h || 1;
       const density = points.length / (w * h);
 
-      // 🐟 เงื่อนไขผ่อนลง (เหมาะกับจอมือถือ)
-      if (ratio < 1.2 || ratio > 4.0) return resolve(false); // ยาวได้ หรือตัวสั้นนิดก็ได้
-      if (density < 0.012 || density > 0.25) return resolve(false); // เส้นบางหรือหนานิดได้
+      // 🎯 เกณฑ์ผ่อนคลายสุด ๆ
+      if (ratio < 1.0 || ratio > 5.0) return resolve(false); // ยาวหรือสั้นได้เกือบหมด
+      if (density < 0.008 || density > 0.35) return resolve(false); // หนา บางก็ได้หมด
 
-      // 📏 ความต่อเนื่องแบบสบาย ๆ
+      // 📏 ความต่อเนื่อง (อนุโลมสุด)
       const avgY = ys.reduce((a, b) => a + b, 0) / ys.length;
       const varianceY = ys.reduce((a, b) => a + Math.pow(b - avgY, 2), 0) / ys.length;
-      const continuity = Math.sqrt(varianceY) / h;
-      if (continuity > 0.5) return resolve(false);
-
-      // ⚖️ สมมาตร (ลดเกณฑ์ลงอีก)
-      const left = points.filter(p => p.x < tmp.width / 2).length;
-      const right = points.filter(p => p.x >= tmp.width / 2).length;
-      const symmetry = Math.min(left, right) / Math.max(left, right);
-      if (symmetry < 0.35) return resolve(false);
+      const continuity = Math.sqrt(varianceY) / (h || 1);
+      if (continuity > 0.6) return resolve(false); // เส้นขาด ๆ ก็พอได้
 
       resolve(true);
     };
   });
 }
+
 
   // 🐟 จำกัดจำนวนปลา (สูงสุด 20 ตัว)
   async function uploadFish(imageData) {
