@@ -172,17 +172,19 @@ if (window.db) {
   // 🐟 อัปโหลดปลาไป Firebase
   async function uploadFish(imageData) {
     try {
-      await window.firebasePush(dbRef, {
-        image: imageData,
-        time: Date.now(),
-      });
-      console.log("✅ Fish uploaded to Firebase");
+      const fishData = { 
+        image: imageData, 
+        time: Date.now(), 
+        user: navigator.userAgent // ✅ บันทึกชื่อเครื่องไว้ด้วย
+      };
+      await window.firebasePush(dbRef, fishData);
+      console.log("✅ Fish uploaded to Firebase:", fishData);
     } catch (err) {
       console.error("❌ Upload failed:", err);
     }
   }
 
-  // 🐠 ดึงข้อมูลปลาจาก Firebase แบบ Realtime
+  // 🐠 ดึงข้อมูลปลาจาก Firebase แบบ realtime
   const fishQuery = window.firebaseQuery(dbRef, window.firebaseLimit(30));
 
   window.firebaseOnValue(fishQuery, (snapshot) => {
@@ -192,11 +194,9 @@ if (window.db) {
       return;
     }
 
-    // ล้างของเก่า
     fishContainer.innerHTML = "";
-
-    // สร้างปลาจาก Firebase
     const fishes = Object.values(data);
+
     fishes.forEach((fish) => {
       const fishImg = document.createElement("img");
       fishImg.src = fish.image;
@@ -208,28 +208,10 @@ if (window.db) {
       fishContainer.appendChild(fishImg);
     });
 
-    // ✅ แสดง debug count มุมขวาล่าง
-    const counter = document.getElementById("fishCounter") || document.createElement("div");
-    counter.id = "fishCounter";
-    counter.textContent = `🐠 ${fishes.length} fish in aquarium`;
-    Object.assign(counter.style, {
-      position: "fixed",
-      bottom: "15px",
-      right: "15px",
-      background: "#4da6ff",
-      color: "white",
-      padding: "8px 14px",
-      borderRadius: "12px",
-      fontSize: "0.9rem",
-      fontWeight: "bold",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-      zIndex: 9999
-    });
-    document.body.appendChild(counter);
-
     console.log(`🐟 Loaded ${fishes.length} fish from Firebase`);
   });
 
+  // ให้ปุ่ม Feed เรียกใช้ uploadFish
   window.saveFish = uploadFish;
 }
 
