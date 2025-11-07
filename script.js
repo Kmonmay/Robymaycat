@@ -162,7 +162,6 @@
       setTimeout(() => b.remove(), 800);
     }
   }
-
 // 🌊 Firebase (Public Aquarium)
 if (window.db) {
   console.log("✅ Firebase connected successfully");
@@ -172,6 +171,7 @@ if (window.db) {
 
   // 🐟 Upload fish to Firebase
   async function uploadFish(imageData) {
+    console.log("🔥 Trying to upload fish to:", dbRef.toString());
     try {
       const fishData = {
         image: imageData,
@@ -185,14 +185,14 @@ if (window.db) {
     }
   }
 
-  // 🐠 Listen for new fish (Realtime)
+  // 🐠 Listen for fish updates in real-time
   const fishQuery = window.firebaseQuery(dbRef, window.firebaseLimit(20));
   window.firebaseOnValue(fishQuery, (snapshot) => {
     const data = snapshot.val();
     fishContainer.innerHTML = "";
 
     if (!data) {
-      console.log("🐾 No fish found in Firebase");
+      console.log("🐾 No fish yet");
       return;
     }
 
@@ -211,9 +211,25 @@ if (window.db) {
     });
   });
 
-  // ✅ Make sure Feed button can use upload function
-  console.log("🔥 Trying to upload fish to path:", dbRef.toString());
-  window.saveFish = uploadFish;
+  // ✅ Make sure Feed button triggers upload directly
+  document.getElementById("feedBtn").addEventListener("click", async () => {
+    const img = canvas.toDataURL("image/png");
+    const isFish = await checkIfFish(img);
+
+    if (!isFish) {
+      showReaction("That’s not a fish… ew! 🐱💬");
+      spawnBubblePop();
+      return;
+    }
+
+    showReaction("Yummy! Thank you for the fish!");
+    spawnBubbles();
+    addFishToAquarium(img);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 🧩 Upload to Firebase
+    await uploadFish(img);
+  });
 }
 
 
