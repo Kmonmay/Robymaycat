@@ -51,7 +51,7 @@
     setTimeout(swim, 1000);
   }
 
-// 🧠 ตรวจว่ารูปคล้ายปลา (เวอร์ชันบาลานซ์ — ไม่ง่าย ไม่ยากเกินไป)
+// 🧠 ตรวจว่ารูปคล้ายปลา (ฉลาดพอดี เวอร์ชันสมดุล)
 async function checkIfFish(imageData) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -64,17 +64,15 @@ async function checkIfFish(imageData) {
       tctx.drawImage(img, 0, 0);
       const d = tctx.getImageData(0, 0, tmp.width, tmp.height);
 
-      // 🎯 เก็บพิกเซลที่มีเส้นวาด
       const points = [];
       for (let y = 0; y < tmp.height; y++) {
         for (let x = 0; x < tmp.width; x++) {
-          const a = d.data[(y * tmp.width + x) * 4 + 3]; // ค่า alpha
+          const a = d.data[(y * tmp.width + x) * 4 + 3];
           if (a > 100) points.push({ x, y });
         }
       }
 
-      // ❌ ต้องมีเส้นจำนวนพอสมควร
-      if (points.length < 300) return resolve(false);
+      if (points.length < 150) return resolve(false); // ต้องมีเส้นเพียงพอ
 
       const xs = points.map(p => p.x);
       const ys = points.map(p => p.y);
@@ -83,26 +81,21 @@ async function checkIfFish(imageData) {
       const ratio = w / h;
       const density = points.length / (w * h);
 
-      // ✅ เงื่อนไขใหม่: "บาลานซ์"
-      // - ปลามักจะยาวกว่าเล็กน้อย (1.6–3.8)
-      // - ไม่หนาแน่นเกินไป
-      // - มีเส้นต่อเนื่องพอควร
-      if (ratio < 1.6 || ratio > 3.8) return resolve(false);
-      if (density < 0.015 || density > 0.20) return resolve(false);
+      // ✅ เงื่อนไข "สมดุล" สำหรับรูปร่างปลา
+      // ยาวกว่าเล็กน้อย, ไม่หนาแน่นเกินไป, มีความต่อเนื่อง
+      if (ratio < 1.3 || ratio > 3.5) return resolve(false);
+      if (density < 0.02 || density > 0.25) return resolve(false);
 
-      // 📏 ตรวจความต่อเนื่อง (ไม่กระจายเป็นจุด)
+      // ✅ ตรวจสอบความต่อเนื่อง (ไม่กระจายเป็นหลายก้อน)
       const avgY = ys.reduce((a, b) => a + b, 0) / ys.length;
       const varianceY = ys.reduce((a, b) => a + Math.pow(b - avgY, 2), 0) / ys.length;
       const continuity = Math.sqrt(varianceY) / h;
+      if (continuity > 0.45) return resolve(false);
 
-      if (continuity > 0.4) return resolve(false);
-
-      // ✅ ผ่าน! ถือว่า “คล้ายปลา”
       resolve(true);
     };
   });
 }
-
 
   // 🐠 อัปโหลดปลา (จำกัดสูงสุด 20 ตัว)
   async function uploadFish(imageData) {
