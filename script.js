@@ -145,11 +145,13 @@
     }
   }
 // 🌊 Firebase (Public Aquarium)
+// 🌊 Firebase (Public Aquarium)
 if (window.db) {
   console.log("✅ Firebase connected successfully");
 
   const db = window.db;
-  const dbRef = window.firebaseRef(db, "fishes");
+  const { firebaseRef, firebasePush, firebaseOnValue, firebaseQuery, firebaseLimit } = window;
+  const dbRef = firebaseRef(db, "fishes");
 
   // 🐟 Upload fish to Firebase
   async function uploadFish(imageData) {
@@ -160,7 +162,7 @@ if (window.db) {
         time: Date.now(),
         user: navigator.userAgent
       };
-      await window.firebasePush(dbRef, fishData);
+      await firebasePush(dbRef, fishData);
       console.log("✅ Fish uploaded:", fishData);
     } catch (err) {
       console.error("❌ Error uploading fish:", err);
@@ -168,8 +170,8 @@ if (window.db) {
   }
 
   // 🐠 Listen for fish updates in real-time
-  const fishQuery = window.firebaseQuery(dbRef, window.firebaseLimit(20));
-  window.firebaseOnValue(fishQuery, (snapshot) => {
+  const queryRef = firebaseQuery(dbRef, firebaseLimit(20)); // ✅ correct syntax
+  firebaseOnValue(queryRef, (snapshot) => {
     const data = snapshot.val();
     fishContainer.innerHTML = "";
 
@@ -179,7 +181,7 @@ if (window.db) {
     }
 
     const fishes = Object.values(data);
-    console.log(`🐟 Loaded ${fishes.length} fish`);
+    console.log(`🐟 Loaded ${fishes.length} fish from Firebase`);
 
     fishes.forEach((fish) => {
       const fishImg = document.createElement("img");
@@ -193,7 +195,7 @@ if (window.db) {
     });
   });
 
-  // ✅ Make sure Feed button triggers upload directly
+  // ✅ Trigger upload when Feed button is clicked
   document.getElementById("feedBtn").addEventListener("click", async () => {
     const img = canvas.toDataURL("image/png");
     const isFish = await checkIfFish(img);
@@ -209,13 +211,6 @@ if (window.db) {
     addFishToAquarium(img);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 🧩 Upload to Firebase
     await uploadFish(img);
   });
 }
-
-
-  // 🎵 เพลงพื้นหลัง
-  const bg = document.getElementById("bgMusic");
-  if (bg) bg.volume = 0.3;
-})();
