@@ -1,17 +1,15 @@
-/* 🌈 โครงหลัก */
 body {
   margin: 0;
   font-family: "Cooper Black", sans-serif;
   background: linear-gradient(to bottom, #e8f7ff, #ffffff);
   text-align: center;
   color: #333;
-  overflow-x: hidden;
 }
 
 h1 {
   color: #4da6ff;
   font-size: 2.5rem;
-  margin-top: 30px;
+  margin-top: 20px;
 }
 
 .subtitle {
@@ -19,47 +17,79 @@ h1 {
   color: #555;
 }
 
-/* 🐠 ตู้ปลา */
 .aquarium {
   position: relative;
   display: inline-block;
-}
-.aquarium video {
-  width: min(720px, 90vw);
+  max-width: 720px;
+  width: 90%;
   border-radius: 16px;
+  overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.25);
 }
+
+.aquarium video {
+  width: 100%;
+  border-radius: 16px;
+}
+
 #fishContainer {
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
 }
+
 .fish {
   position: absolute;
   width: 120px;
   opacity: 0.9;
   animation: swim 10s linear infinite;
 }
+
 @keyframes swim {
   0% { transform: translateX(-10%) }
   50% { transform: translateX(110%) rotate(5deg) }
   100% { transform: translateX(-10%) }
 }
 
-/* 🎨 ตัวเลือกสี */
-.color-picker { 
-  margin: 20px 0; 
-  font-size: 1.1rem; 
+/* 🎨 Drawing Area */
+.draw-area {
+  margin-top: 30px;
+  text-align: center;
 }
+
+canvas {
+  display: block;
+  margin: 15px auto;
+  width: 90%;
+  max-width: 400px;
+  height: 300px;
+  border: 4px dashed #99ccff;
+  border-radius: 20px;
+  background-color: #f0faff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  touch-action: none;
+  -webkit-user-select: none;
+}
+
+.color-picker {
+  margin-top: 15px;
+}
+
+.color-row {
+  margin-top: 8px;
+}
+
 .color-btn {
-  width: 40px; height: 40px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 3px solid transparent;
-  margin: 0 8px;
+  margin: 0 6px;
   cursor: pointer;
   transition: transform .2s, border .2s;
 }
+
 .color-btn:hover { transform: scale(1.15); }
 .color-btn.active { border: 3px solid #333; transform: scale(1.2); }
 
@@ -70,25 +100,10 @@ h1 {
 .red { background:#ff4d4d; }
 .black { background:#000; }
 
-/* ✏️ พื้นที่วาด */
-canvas {
-  display: block;
-  margin: 0 auto;
-  width: 90%;
-  max-width: 400px;
-  height: 300px;
-  border: 4px dashed #99ccff;
-  border-radius: 20px;
-  background-color: #f0faff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  cursor: crosshair;
-  touch-action: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-  -webkit-tap-highlight-color: transparent;
+.buttons {
+  margin-top: 10px;
 }
 
-/* 🧼 ปุ่มต่าง ๆ */
 button {
   background:#cce6ff;
   border:none;
@@ -99,36 +114,36 @@ button {
   margin:0 8px;
   transition:.3s;
 }
+
 button:hover { background:#99d6ff; }
 
-/* 💬 พื้นที่ข้อความตอบสนอง */
+/* 💬 Reaction + Bubbles */
 .reaction-area {
   position: relative;
-  margin-top: 40px;
+  margin-top: 30px;
   display:flex;
   flex-direction:column;
   align-items:center;
   height:180px;
 }
+
 #reactionText {
   font-size:1.3rem;
   font-weight:bold;
   color:#444;
   opacity:0;
   transition:opacity .5s;
-  animation: poptext 0.4s ease;
-}
-@keyframes poptext {
-  0% { transform: scale(0.8); opacity: 0; }
-  60% { transform: scale(1.2); opacity: 1; }
-  100% { transform: scale(1); }
 }
 
-/* 🫧 ฟอง */
-.bubble {
-  position:absolute; bottom:0; border-radius:50%;
-  opacity:.7; animation:float 3s ease-in infinite;
+.bubble, .pop-bubble {
+  position:absolute;
+  bottom:0;
+  border-radius:50%;
 }
-@keyframes float {
-  from { transform: translateY(0) scale(1); opacity:.7; }
-  to { transform: translateY(-120px) scale(1.3);
+
+footer {
+  margin:30px 0;
+  font-size:.9rem;
+  color:#888;
+}
+
