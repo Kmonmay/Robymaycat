@@ -51,24 +51,58 @@
     setTimeout(swim, 1000);
   }
 
-  // 🧠 ตรวจว่าคล้ายปลา
-  async function checkIfFish(imageData) {
-    return new Promise(resolve => {
-      const img = new Image();
-      img.src = imageData;
-      img.onload = () => {
-        const tmp = document.createElement("canvas");
-        const tctx = tmp.getContext("2d");
-        tmp.width = img.width;
-        tmp.height = img.height;
-        tctx.drawImage(img, 0, 0);
-        const d = tctx.getImageData(0, 0, tmp.width, tmp.height);
-        let count = 0;
-        for (let i = 3; i < d.data.length; i += 4) if (d.data[i] > 100) count++;
-        resolve(count > 150);
-      };
-    });
-  }
+// 🧠 ตรวจว่ารูปคล้ายปลา (เวอร์ชันบาลานซ์ — ไม่ง่าย ไม่ยากเกินไป)
+async function checkIfFish(imageData) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = imageData;
+    img.onload = () => {
+      const tmp = document.createElement("canvas");
+      const tctx = tmp.getContext("2d");
+      tmp.width = img.width;
+      tmp.height = img.height;
+      tctx.drawImage(img, 0, 0);
+      const d = tctx.getImageData(0, 0, tmp.width, tmp.height);
+
+      // 🎯 เก็บพิกเซลที่มีเส้นวาด
+      const points = [];
+      for (let y = 0; y < tmp.height; y++) {
+        for (let x = 0; x < tmp.width; x++) {
+          const a = d.data[(y * tmp.width + x) * 4 + 3]; // ค่า alpha
+          if (a > 100) points.push({ x, y });
+        }
+      }
+
+      // ❌ ต้องมีเส้นจำนวนพอสมควร
+      if (points.length < 300) return resolve(false);
+
+      const xs = points.map(p => p.x);
+      const ys = points.map(p => p.y);
+      const w = Math.max(...xs) - Math.min(...xs);
+      const h = Math.max(...ys) - Math.min(...ys);
+      const ratio = w / h;
+      const density = points.length / (w * h);
+
+      // ✅ เงื่อนไขใหม่: "บาลานซ์"
+      // - ปลามักจะยาวกว่าเล็กน้อย (1.6–3.8)
+      // - ไม่หนาแน่นเกินไป
+      // - มีเส้นต่อเนื่องพอควร
+      if (ratio < 1.6 || ratio > 3.8) return resolve(false);
+      if (density < 0.015 || density > 0.20) return resolve(false);
+
+      // 📏 ตรวจความต่อเนื่อง (ไม่กระจายเป็นจุด)
+      const avgY = ys.reduce((a, b) => a + b, 0) / ys.length;
+      const varianceY = ys.reduce((a, b) => a + Math.pow(b - avgY, 2), 0) / ys.length;
+      const continuity = Math.sqrt(varianceY) / h;
+
+      if (continuity > 0.4) return resolve(false);
+
+      // ✅ ผ่าน! ถือว่า “คล้ายปลา”
+      resolve(true);
+    };
+  });
+}
+
 
   // 🐠 อัปโหลดปลา (จำกัดสูงสุด 20 ตัว)
   async function uploadFish(imageData) {
