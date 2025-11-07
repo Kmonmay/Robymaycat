@@ -87,6 +87,15 @@ const firebaseConfig = {
     window.firebasePush = push;
     window.firebaseOnValue = onValue;
     window.firebaseLimit = limitToLast;
+    // ✅ ตรวจว่าเชื่อม Firebase ได้จริงไหม
+try {
+  const testRef = ref(db, "connection_test");
+  await push(testRef, { connected: true, time: Date.now() });
+  console.log("✅ Firebase Connected");
+} catch (error) {
+  console.error("❌ Firebase Connection Error:", error);
+}
+
   </script>
 
   <script src="script.js"></script>
