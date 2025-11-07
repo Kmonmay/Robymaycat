@@ -19,6 +19,10 @@
       btn.classList.add("active");
     });
   });
+  document.getElementById("feedBtn").addEventListener("click", async () => {
+  console.log("🐾 Feed button clicked!");
+});
+
 
   function startDraw(x, y) {
     drawing = true;
