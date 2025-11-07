@@ -156,3 +156,23 @@ footer {
   font-size: .9rem;
   color: #888;
 }
+/* ✅ ให้แน่ใจว่าปลาและวิดีโอไม่บัง canvas */
+.aquarium {
+  position: relative;
+  z-index: 1;
+}
+
+#fishContainer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none; /* ป้องกันไม่ให้บังการแตะ/ลากบน canvas */
+}
+
+/* ✅ Canvas อยู่เหนือสุด รับการแตะ/คลิกได้จริง */
+#drawCanvas {
+  position: relative;
+  z-index: 10;          /* อยู่เหนือทั้ง video และปลา */
+  pointer-events: auto; /* รับ event ได้แน่นอน */
+  touch-action: none;   /* ป้องกันมือถือเลื่อนหรือซูม */
+}
