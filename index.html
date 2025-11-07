@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Robymaycat</title>
   <link rel="stylesheet" href="style.css">
@@ -47,59 +46,40 @@
     </div>
   </main>
 
-  <div id="fishListModal" class="modal">
-    <div class="modal-content">
-      <h2>My Fish List</h2>
-      <div id="fishList"></div>
-      <button id="closeModal">Close</button>
-    </div>
-  </div>
-
   <footer>
     <p>Made with 💙 by Robymaycat</p>
   </footer>
 
-  <!-- Background music -->
+  <!-- 🎵 Background music -->
   <audio id="bgMusic" autoplay loop>
     <source src="music.mp3" type="audio/mpeg">
   </audio>
 
   <!-- ✅ Firebase SDK Integration -->
   <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-  import { getDatabase, ref, push, onValue, limitToLast } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getDatabase, ref, push, onValue, limitToLast } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDwJ__tUXNhDhuyfEH4nxf1DoiAeiMA20o",
-    authDomain: "robymaycat.firebaseapp.com",
-    databaseURL: "https://robymaycat-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "robymaycat",
-    storageBucket: "robymaycat.firebasestorage.app",
-    messagingSenderId: "902678070279",
-    appId: "1:902678070279:web:c3f054e2b43ec0b7c916a2",
-    measurementId: "G-RHCWLERB37"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwJ__tUXNhDhuyfEH4nxf1DoiAeiMA20o",
+      authDomain: "robymaycat.firebaseapp.com",
+      databaseURL: "https://robymaycat-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "robymaycat",
+      storageBucket: "robymaycat.firebasestorage.app",
+      messagingSenderId: "902678070279",
+      appId: "1:902678070279:web:c3f054e2b43ec0b7c916a2",
+      measurementId: "G-RHCWLERB37"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  window.db = db;
-  window.firebaseRef = ref;
-  window.firebasePush = push;
-  window.firebaseOnValue = onValue;
-  window.firebaseLimit = limitToLast;
-</script>
-  
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    window.db = db;
+    window.firebaseRef = ref;
+    window.firebasePush = push;
+    window.firebaseOnValue = onValue;
+    window.firebaseLimit = limitToLast;
+
     // ✅ ตรวจว่าเชื่อม Firebase ได้จริงไหม
-try {
-  const testRef = ref(db, "connection_test");
-  await push(testRef, { connected: true, time: Date.now() });
-  console.log("✅ Firebase Connected");
-} catch (error) {
-  console.error("❌ Firebase Connection Error:", error);
-}
-
-  </script>
-
-  <script src="script.js"></script>
-</body>
-</html>
+    try {
+      const testRef = ref(db, "connection_test");
+      await push(testRef, { connected: true, time
