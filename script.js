@@ -144,7 +144,7 @@
       setTimeout(() => b.remove(), 800);
     }
   }
-// 🌊 Firebase (Public Aquarium)
+
 // 🌊 Firebase (Public Aquarium)
 if (window.db) {
   console.log("✅ Firebase connected successfully");
