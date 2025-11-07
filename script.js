@@ -86,58 +86,57 @@
     setTimeout(swim, 1000);
   }
 
-  // 🧠 ตรวจว่ารูปคล้ายปลา (Balanced–Hard Mode)
-  async function checkIfFish(imageData) {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.src = imageData;
-      img.onload = () => {
-        const tmp = document.createElement("canvas");
-        const tctx = tmp.getContext("2d");
-        tmp.width = img.width;
-        tmp.height = img.height;
-        tctx.drawImage(img, 0, 0);
-        const d = tctx.getImageData(0, 0, tmp.width, tmp.height);
+// 🧠 ตรวจว่ารูปคล้ายปลา (Mobile-Friendly Mode: ปานกลาง)
+async function checkIfFish(imageData) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = imageData;
+    img.onload = () => {
+      const tmp = document.createElement("canvas");
+      const tctx = tmp.getContext("2d");
+      tmp.width = img.width;
+      tmp.height = img.height;
+      tctx.drawImage(img, 0, 0);
+      const d = tctx.getImageData(0, 0, tmp.width, tmp.height);
 
-        const points = [];
-        for (let y = 0; y < tmp.height; y++) {
-          for (let x = 0; x < tmp.width; x++) {
-            const a = d.data[(y * tmp.width + x) * 4 + 3];
-            if (a > 100) points.push({ x, y });
-          }
+      const points = [];
+      for (let y = 0; y < tmp.height; y++) {
+        for (let x = 0; x < tmp.width; x++) {
+          const a = d.data[(y * tmp.width + x) * 4 + 3];
+          if (a > 100) points.push({ x, y });
         }
+      }
 
-        // 🧩 ต้องมีเส้นเยอะพอ
-        if (points.length < 600) return resolve(false);
+      // 🎯 ต้องวาดพอมีรูปทรง (แต่ไม่ต้องเยอะเกิน)
+      if (points.length < 300) return resolve(false);
 
-        const xs = points.map(p => p.x);
-        const ys = points.map(p => p.y);
-        const w = Math.max(...xs) - Math.min(...xs);
-        const h = Math.max(...ys) - Math.min(...ys);
-        const ratio = w / h;
-        const density = points.length / (w * h);
+      const xs = points.map(p => p.x);
+      const ys = points.map(p => p.y);
+      const w = Math.max(...xs) - Math.min(...xs);
+      const h = Math.max(...ys) - Math.min(...ys);
+      const ratio = w / h;
+      const density = points.length / (w * h);
 
-        // 🎯 เงื่อนไขใหม่ (คมกว่าเดิม)
-        // ต้อง "ยาวพอดี", "ไม่หนาแน่นเกิน", "เส้นต่อเนื่อง"
-        if (ratio < 1.9 || ratio > 3.3) return resolve(false);
-        if (density < 0.018 || density > 0.12) return resolve(false);
+      // 🐟 เงื่อนไขที่ผ่อนลงเล็กน้อย
+      if (ratio < 1.4 || ratio > 3.6) return resolve(false); // ยาวพอสมควร
+      if (density < 0.015 || density > 0.20) return resolve(false); // ความหนาแน่นสมดุล
 
-        // 📏 ความต่อเนื่องแนวตั้ง (ห้ามกระจายเกิน)
-        const avgY = ys.reduce((a, b) => a + b, 0) / ys.length;
-        const varianceY = ys.reduce((a, b) => a + Math.pow(b - avgY, 2), 0) / ys.length;
-        const continuity = Math.sqrt(varianceY) / h;
-        if (continuity > 0.32) return resolve(false);
+      // 📏 ความต่อเนื่องแนวตั้ง (ลดความเข้มงวด)
+      const avgY = ys.reduce((a, b) => a + b, 0) / ys.length;
+      const varianceY = ys.reduce((a, b) => a + Math.pow(b - avgY, 2), 0) / ys.length;
+      const continuity = Math.sqrt(varianceY) / h;
+      if (continuity > 0.4) return resolve(false);
 
-        // ⚖️ สมมาตรซ้าย-ขวา (ไม่เบี้ยวเกิน)
-        const left = points.filter(p => p.x < tmp.width / 2).length;
-        const right = points.filter(p => p.x >= tmp.width / 2).length;
-        const symmetry = Math.min(left, right) / Math.max(left, right);
-        if (symmetry < 0.5) return resolve(false);
+      // ⚖️ สมมาตร (ไม่ต้องเท่ากันเป๊ะ)
+      const left = points.filter(p => p.x < tmp.width / 2).length;
+      const right = points.filter(p => p.x >= tmp.width / 2).length;
+      const symmetry = Math.min(left, right) / Math.max(left, right);
+      if (symmetry < 0.4) return resolve(false);
 
-        resolve(true);
-      };
-    });
-  }
+      resolve(true);
+    };
+  });
+}
 
   // 🐟 จำกัดจำนวนปลา (สูงสุด 20 ตัว)
   async function uploadFish(imageData) {
