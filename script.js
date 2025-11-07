@@ -219,3 +219,29 @@ if (window.db) {
   // เก็บฟังก์ชัน upload ไว้ให้ปุ่ม Feed ใช้งาน
   window.saveFish = uploadFish;
 }
+// ✅ แสดงสถานะ Firebase
+const statusBadge = document.createElement("div");
+statusBadge.id = "firebaseStatus";
+statusBadge.style.position = "fixed";
+statusBadge.style.bottom = "15px";
+statusBadge.style.right = "15px";
+statusBadge.style.padding = "8px 14px";
+statusBadge.style.borderRadius = "12px";
+statusBadge.style.fontSize = "0.9rem";
+statusBadge.style.fontWeight = "bold";
+statusBadge.style.color = "white";
+statusBadge.style.background = "#888";
+statusBadge.textContent = "Checking Firebase...";
+document.body.appendChild(statusBadge);
+
+try {
+  const testRef = window.firebaseRef(window.db, "connection_test");
+  await window.firebasePush(testRef, { connected: true, time: Date.now() });
+  statusBadge.style.background = "#2ecc71"; // เขียว
+  statusBadge.textContent = "🟢 Connected to Firebase";
+} catch (error) {
+  statusBadge.style.background = "#e74c3c"; // แดง
+  statusBadge.textContent = "🔴 Firebase Offline";
+  console.error("Firebase connection error:", error);
+}
+
