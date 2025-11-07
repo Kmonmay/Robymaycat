@@ -161,14 +161,17 @@ if (window.db) {
   async function uploadFish(imageData) {
     await window.firebasePush(dbRef, { image: imageData, time: Date.now() });
   }
-  window.firebaseOnValue(window.firebaseLimit(dbRef, 15), snapshot => {
-    const data = snapshot.val();
-    if (!data) return;
-    fishContainer.innerHTML = "";
-    Object.values(data).forEach(fish => addFishToAquarium(fish.image));
-  });
-  window.saveFish = uploadFish;
-}
+import { onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+const dbRef = query(window.firebaseRef(window.db, "fishes"), limitToLast(15));
+
+onValue(dbRef, snapshot => {
+  const data = snapshot.val();
+  if (!data) return;
+  fishContainer.innerHTML = "";
+  Object.values(data).forEach(fish => addFishToAquarium(fish.image));
+});
+
 
 // 🎵 Background Music Volume
 const bg = document.getElementById("bgMusic");
