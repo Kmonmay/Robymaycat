@@ -4,6 +4,7 @@
   let drawing = false;
   let currentColor = "#000000";
 
+  // ✅ ปรับขนาด canvas ให้เหมาะกับจอ
   function resizeCanvas() {
     const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width;
@@ -42,7 +43,7 @@
   canvas.addEventListener("mouseup", stopDraw);
   canvas.addEventListener("mouseleave", stopDraw);
 
-  // 📱 มือถือ
+  // 📱 Touch (มือถือ)
   canvas.addEventListener("touchstart", (e) => {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
@@ -57,7 +58,7 @@
   });
   canvas.addEventListener("touchend", stopDraw);
 
-  // 🧼 ปุ่มล้าง
+  // 🧼 ปุ่ม Clear
   document.getElementById("clearBtn").addEventListener("click", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
@@ -104,15 +105,26 @@
     });
   }
 
-  // 🐟 เพิ่มปลาในตู้ (พร้อมแตะให้เร่ง)
   const fishContainer = document.getElementById("fishContainer");
+
+  // 💬 ฟังก์ชันแสดงข้อความ (Reaction)
+  function showReaction(text) {
+    const el = document.getElementById("reactionText");
+    if (!el) return;
+    el.textContent = text;
+    el.style.opacity = 1;
+    el.style.transition = "opacity 0.5s ease";
+    setTimeout(() => (el.style.opacity = 0), 2000);
+  }
+
+  // 🐟 เพิ่มปลาในตู้ (พร้อมแตะให้ว่ายเร็วขึ้น)
   function addFishToAquarium(imageData) {
     const fish = document.createElement("img");
     fish.src = imageData;
     fish.classList.add("fish");
     fish.style.position = "absolute";
     fish.style.width = 80 + Math.random() * 60 + "px";
-    fish.style.top = 50 + Math.random() * 45 + "%";
+    fish.style.top = 50 + Math.random() * 45 + "%"; // ครึ่งล่างของจอ
     fish.style.left = 10 + Math.random() * 70 + "%";
     fish.style.opacity = 0.9;
     fish.style.transition = "top 8s ease-in-out, left 8s ease-in-out, transform 1s ease";
@@ -132,7 +144,7 @@
       setTimeout(swim, duration);
     }
 
-    // 🩵 แตะแล้วว่ายเร็วขึ้น 2 วินาที
+    // 🩵 แตะแล้วว่ายเร็วขึ้น 2 วิ
     function speedBoost() {
       fish.style.transition = `top 2000ms ease-in-out, left 2000ms ease-in-out, transform 0.6s ease`;
 
@@ -143,7 +155,6 @@
       fish.style.left = `${randomX}%`;
       fish.style.transform = flip;
 
-      // เอฟเฟกต์ฟองน้ำเมื่อแตะ
       spawnTinyBubble(fish, true);
 
       setTimeout(() => {
@@ -151,7 +162,7 @@
       }, 2000);
     }
 
-    // 🎈 ฟองน้ำรอบตัวปลา
+    // 🎈 ฟองน้ำรอบปลา
     function spawnTinyBubble(fish, boosted = false) {
       const bubble = document.createElement("div");
       bubble.classList.add("bubble");
@@ -165,57 +176,4 @@
 
       bubble.animate(
         [{ transform: "translateY(0)", opacity: 1 }, { transform: "translateY(-40px)", opacity: 0 }],
-        { duration: 2000, easing: "ease-out", fill: "forwards" }
-      );
-
-      setTimeout(() => bubble.remove(), 2000);
-    }
-
-    fish.addEventListener("click", speedBoost);
-    fish.addEventListener("touchstart", (e) => { e.preventDefault(); speedBoost(); });
-
-    setTimeout(swim, 1000 + Math.random() * 2000);
-  }
-
-  // 🌊 Firebase (Public Aquarium)
-  if (window.db) {
-    console.log("✅ Firebase connected successfully");
-    const db = window.db;
-    const dbRef = window.firebaseRef(db, "fishes");
-    const { query, limitToLast } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js");
-
-    async function uploadFish(imageData) {
-      try {
-        const fishData = { image: imageData, time: Date.now(), user: navigator.userAgent };
-        await window.firebasePush(dbRef, fishData);
-        console.log("✅ Fish uploaded successfully");
-      } catch (err) {
-        console.error("❌ Upload failed:", err);
-      }
-    }
-
-    const queryRef = query(dbRef, limitToLast(20));
-    window.firebaseOnValue(queryRef, (snapshot) => {
-      const data = snapshot.val();
-      fishContainer.innerHTML = "";
-      if (!data) return;
-      Object.values(data).forEach((fish) => addFishToAquarium(fish.image));
-    });
-
-    document.getElementById("feedBtn").addEventListener("click", async () => {
-      const img = canvas.toDataURL("image/png");
-      const isFish = await checkIfFish(img);
-      if (!isFish) {
-        showReaction("That’s not a fish… ew! 🐱💬");
-        return;
-      }
-      showReaction("Yummy! Thank you for the fish!");
-      addFishToAquarium(img);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      await uploadFish(img);
-    });
-  }
-
-  const bg = document.getElementById("bgMusic");
-  if (bg) bg.volume = 0.3;
-})();
+        { du
