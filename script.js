@@ -1,62 +1,60 @@
 (async function () {
-  const canvas = document.getElementById("drawCanvas");
-  const ctx = canvas.getContext("2d");
-  let drawing = false;
-  let currentColor = "#000000";
+const canvas = document.getElementById("drawCanvas");
+const ctx = canvas.getContext("2d");
+let drawing = false;
+let currentColor = "#000000";
 
-  // ✅ ปรับขนาด canvas ให้เหมาะกับจอ
-  function resizeCanvas() {
-    const rect = canvas.getBoundingClientRect();
+// ✅ กำหนดขนาดคงที่ (ไม่ reset เวลา resize)
+function resizeCanvas() {
+  const rect = canvas.getBoundingClientRect();
+  if (canvas.width !== rect.width || canvas.height !== rect.height) {
+    const temp = ctx.getImageData(0, 0, canvas.width, canvas.height); // เก็บภาพไว้
     canvas.width = rect.width;
     canvas.height = rect.height;
+    ctx.putImageData(temp, 0, 0); // คืนภาพ
   }
-  resizeCanvas();
-  window.addEventListener("resize", resizeCanvas);
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 
-  // 🎨 เลือกสี
-  document.querySelectorAll(".color-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      currentColor = btn.getAttribute("data-color");
-      document.querySelectorAll(".color-btn").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-    });
-  });
+// 🖌️ เริ่มวาด
+canvas.addEventListener("mousedown", (e) => {
+  drawing = true;
+  ctx.beginPath();
+  ctx.moveTo(e.offsetX, e.offsetY);
+});
+canvas.addEventListener("mousemove", (e) => {
+  if (!drawing) return;
+  ctx.lineTo(e.offsetX, e.offsetY);
+  ctx.strokeStyle = currentColor;
+  ctx.lineWidth = 6;
+  ctx.lineCap = "round";
+  ctx.stroke();
+});
+canvas.addEventListener("mouseup", () => drawing = false);
+canvas.addEventListener("mouseleave", () => drawing = false);
 
-  // ✏️ วาดเส้น
-  function startDraw(x, y) {
-    drawing = true;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-  }
-  function draw(x, y) {
-    if (!drawing) return;
-    ctx.lineTo(x, y);
-    ctx.strokeStyle = currentColor;
-    ctx.lineWidth = 8;
-    ctx.lineCap = "round";
-    ctx.stroke();
-  }
-  function stopDraw() { drawing = false; }
-
-  canvas.addEventListener("mousedown", (e) => startDraw(e.offsetX, e.offsetY));
-  canvas.addEventListener("mousemove", (e) => draw(e.offsetX, e.offsetY));
-  canvas.addEventListener("mouseup", stopDraw);
-  canvas.addEventListener("mouseleave", stopDraw);
-
-  // 📱 Touch (มือถือ)
-  canvas.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    const rect = canvas.getBoundingClientRect();
-    const t = e.touches[0];
-    startDraw(t.clientX - rect.left, t.clientY - rect.top);
-  });
-  canvas.addEventListener("touchmove", (e) => {
-    e.preventDefault();
-    const rect = canvas.getBoundingClientRect();
-    const t = e.touches[0];
-    draw(t.clientX - rect.left, t.clientY - rect.top);
-  });
-  canvas.addEventListener("touchend", stopDraw);
+// 📱 Touch (มือถือ)
+canvas.addEventListener("touchstart", (e) => {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const t = e.touches[0];
+  drawing = true;
+  ctx.beginPath();
+  ctx.moveTo(t.clientX - rect.left, t.clientY - rect.top);
+});
+canvas.addEventListener("touchmove", (e) => {
+  e.preventDefault();
+  if (!drawing) return;
+  const rect = canvas.getBoundingClientRect();
+  const t = e.touches[0];
+  ctx.lineTo(t.clientX - rect.left, t.clientY - rect.top);
+  ctx.strokeStyle = currentColor;
+  ctx.lineWidth = 6;
+  ctx.lineCap = "round";
+  ctx.stroke();
+});
+canvas.addEventListener("touchend", () => drawing = false);
 
   // 🧼 ปุ่ม Clear
   document.getElementById("clearBtn").addEventListener("click", () => {
