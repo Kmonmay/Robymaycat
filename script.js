@@ -193,9 +193,13 @@ function spawnBubblePop() {
 // 🌊 Firebase (Public Aquarium)
 if (window.db) {
   const dbRef = window.firebaseRef(window.db, "fishes");
+
+  // ฟังก์ชันอัปโหลดภาพปลาไป Firebase
   async function uploadFish(imageData) {
     await window.firebasePush(dbRef, { image: imageData, time: Date.now() });
   }
+
+  // ดึงข้อมูลปลาแบบเรียลไทม์จาก Firebase
   window.firebaseOnValue(window.firebaseLimit(dbRef, 15), (snapshot) => {
     const data = snapshot.val();
     if (!data) return;
@@ -211,9 +215,7 @@ if (window.db) {
       fishContainer.appendChild(fishImg);
     });
   });
+
+  // เก็บฟังก์ชัน upload ไว้ให้ปุ่ม Feed ใช้งาน
   window.saveFish = uploadFish;
 }
-
-// 🎵 เพลง
-const bg = document.getElementById("bgMusic");
-if (bg) bg.volume = 0.3;
