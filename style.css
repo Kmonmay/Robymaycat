@@ -140,6 +140,24 @@ button:hover { background: #99d6ff; }
   z-index: 20;           /* อยู่เหนือ video และปลา */
   pointer-events: auto;  /* รับการแตะ/ลากจากผู้ใช้ได้ */
 }
+/* ✅ แก้ให้ canvas วาดได้แน่นอน ทั้งในคอมและมือถือ */
+.aquarium {
+  position: relative;
+  z-index: 1;
+}
 
+#fishContainer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none; /* ไม่บัง event ของ canvas */
+}
+
+#drawCanvas {
+  position: relative;
+  z-index: 5;           /* ให้อยู่เหนือ video/fishContainer */
+  pointer-events: auto; /* รับการแตะหรือคลิกได้ */
+  touch-action: none;   /* ป้องกันมือถือซูม/เลื่อน */
+}
 
 footer { margin: 30px 0; font-size: .9rem; color: #888; }
