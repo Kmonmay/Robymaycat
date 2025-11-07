@@ -2,11 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Robymaycat</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Cooper+Black&display=swap" rel="stylesheet">
 </head>
+
 <body>
   <header>
     <h1>Robymaycat</h1>
@@ -50,12 +52,12 @@
     <p>Made with 💙 by Robymaycat</p>
   </footer>
 
-  <!-- 🎵 Background music -->
+  <!-- Background music -->
   <audio id="bgMusic" autoplay loop>
     <source src="music.mp3" type="audio/mpeg">
   </audio>
 
-  <!-- ✅ Firebase SDK Integration -->
+  <!-- ✅ Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getDatabase, ref, push, onValue, limitToLast } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
@@ -78,8 +80,8 @@
     window.firebasePush = push;
     window.firebaseOnValue = onValue;
     window.firebaseLimit = limitToLast;
+  </script>
 
-    // ✅ ตรวจว่าเชื่อม Firebase ได้จริงไหม
-    try {
-      const testRef = ref(db, "connection_test");
-      await push(testRef, { connected: true, time
+  <script src="script.js"></script>
+</body>
+</html>
