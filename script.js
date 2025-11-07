@@ -165,37 +165,39 @@
 
 // 🌊 Firebase (Public Aquarium)
 if (window.db) {
-  console.log("✅ Firebase connected, syncing fish...");
+  console.log("✅ Firebase connected successfully");
 
-  const dbRef = window.firebaseRef(window.db, "fishes");
+  const db = window.db;
+  const dbRef = window.firebaseRef(db, "fishes");
 
-  // 🐟 อัปโหลดปลาไป Firebase
+  // 🐟 Upload fish to Firebase
   async function uploadFish(imageData) {
     try {
-      const fishData = { 
-        image: imageData, 
-        time: Date.now(), 
-        user: navigator.userAgent // ✅ บันทึกชื่อเครื่องไว้ด้วย
+      const fishData = {
+        image: imageData,
+        time: Date.now(),
+        user: navigator.userAgent
       };
       await window.firebasePush(dbRef, fishData);
-      console.log("✅ Fish uploaded to Firebase:", fishData);
+      console.log("✅ Fish uploaded:", fishData);
     } catch (err) {
-      console.error("❌ Upload failed:", err);
+      console.error("❌ Error uploading fish:", err);
     }
   }
 
-  // 🐠 ดึงข้อมูลปลาจาก Firebase แบบ realtime
-  const fishQuery = window.firebaseQuery(dbRef, window.firebaseLimit(30));
-
+  // 🐠 Listen for new fish (Realtime)
+  const fishQuery = window.firebaseQuery(dbRef, window.firebaseLimit(20));
   window.firebaseOnValue(fishQuery, (snapshot) => {
     const data = snapshot.val();
+    fishContainer.innerHTML = "";
+
     if (!data) {
-      console.log("🐾 No fish yet");
+      console.log("🐾 No fish found in Firebase");
       return;
     }
 
-    fishContainer.innerHTML = "";
     const fishes = Object.values(data);
+    console.log(`🐟 Loaded ${fishes.length} fish`);
 
     fishes.forEach((fish) => {
       const fishImg = document.createElement("img");
@@ -207,11 +209,9 @@ if (window.db) {
       fishImg.style.animationDuration = (8 + Math.random() * 4) + "s";
       fishContainer.appendChild(fishImg);
     });
-
-    console.log(`🐟 Loaded ${fishes.length} fish from Firebase`);
   });
 
-  // ให้ปุ่ม Feed เรียกใช้ uploadFish
+  // ✅ Make sure Feed button can use upload function
   window.saveFish = uploadFish;
 }
 
