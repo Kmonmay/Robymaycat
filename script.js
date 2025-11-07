@@ -99,24 +99,6 @@
     });
   }
 
-  // 🍽️ ปุ่ม Feed
-  document.getElementById("feedBtn").addEventListener("click", async () => {
-    const img = canvas.toDataURL("image/png");
-    const isFish = await checkIfFish(img);
-
-    if (!isFish) {
-      showReaction("That’s not a fish… ew! 🐱💬");
-      spawnBubblePop();
-      return;
-    }
-
-    showReaction("Yummy! Thank you for the fish!");
-    spawnBubbles();
-    addFishToAquarium(img);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (window.saveFish) window.saveFish(img);
-  });
-
   // 🐟 เพิ่มปลาในตู้
   const fishContainer = document.getElementById("fishContainer");
   function addFishToAquarium(imageData) {
