@@ -7,15 +7,52 @@
   const db = window.db;
   const dbRef = window.firebaseRef(db, "fishes");
 
-  // วาด
-  canvas.addEventListener("mousedown", e => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
-  canvas.addEventListener("mousemove", e => { if (drawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.strokeStyle = currentColor; ctx.lineWidth = 6; ctx.lineCap = "round"; ctx.stroke(); }});
-  canvas.addEventListener("mouseup", () => drawing = false);
-  canvas.addEventListener("mouseleave", () => drawing = false);
-  canvas.addEventListener("touchstart", e => { e.preventDefault(); const r = canvas.getBoundingClientRect(); const t = e.touches[0]; drawing = true; ctx.beginPath(); ctx.moveTo(t.clientX - r.left, t.clientY - r.top); });
-  canvas.addEventListener("touchmove", e => { e.preventDefault(); if (!drawing) return; const r = canvas.getBoundingClientRect(); const t = e.touches[0]; ctx.lineTo(t.clientX - r.left, t.clientY - r.top); ctx.strokeStyle = currentColor; ctx.lineWidth = 6; ctx.lineCap = "round"; ctx.stroke(); });
-  canvas.addEventListener("touchend", () => drawing = false);
+  // 🎨 วาดด้วยเมาส์หรือสัมผัส
+  function startDraw(x, y) {
+    drawing = true;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  }
+  function draw(x, y) {
+    if (!drawing) return;
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = currentColor;
+    ctx.lineWidth = 6;
+    ctx.lineCap = "round";
+    ctx.stroke();
+  }
+  function stopDraw() {
+    drawing = false;
+  }
 
+  // 🖱️ เมาส์
+  canvas.addEventListener("mousedown", e => startDraw(e.offsetX, e.offsetY));
+  canvas.addEventListener("mousemove", e => draw(e.offsetX, e.offsetY));
+  canvas.addEventListener("mouseup", stopDraw);
+  canvas.addEventListener("mouseleave", stopDraw);
+
+  // 📱 ทัชสกรีน
+  canvas.addEventListener("touchstart", e => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const t = e.touches[0];
+    startDraw(t.clientX - rect.left, t.clientY - rect.top);
+  });
+  canvas.addEventListener("touchmove", e => {
+    e.preventDefault();
+    if (!drawing) return;
+    const rect = canvas.getBoundingClientRect();
+    const t = e.touches[0];
+    draw(t.clientX - rect.left, t.clientY - rect.top);
+  });
+  canvas.addEventListener("touchend", stopDraw);
+
+  // 🧹 ปุ่ม Clear
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+
+  // 🎨 เปลี่ยนสี
   document.querySelectorAll(".color-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       currentColor = btn.getAttribute("data-color");
@@ -24,11 +61,9 @@
     });
   });
 
-  document.getElementById("clearBtn").addEventListener("click", () => ctx.clearRect(0, 0, canvas.width, canvas.height));
-
   const fishContainer = document.getElementById("fishContainer");
 
-  // 🐟 เพิ่มปลาในตู้
+  // 🐠 เพิ่มปลาในตู้
   function addFish(image) {
     const fish = document.createElement("img");
     fish.src = image;
@@ -51,62 +86,69 @@
     setTimeout(swim, 1000);
   }
 
-// 🧠 ตรวจว่ารูปคล้ายปลา (ฉลาดพอดี เวอร์ชันสมดุล)
-async function checkIfFish(imageData) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.src = imageData;
-    img.onload = () => {
-      const tmp = document.createElement("canvas");
-      const tctx = tmp.getContext("2d");
-      tmp.width = img.width;
-      tmp.height = img.height;
-      tctx.drawImage(img, 0, 0);
-      const d = tctx.getImageData(0, 0, tmp.width, tmp.height);
+  // 🧠 ตรวจว่ารูปคล้ายปลา (Balanced–Hard Mode)
+  async function checkIfFish(imageData) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = imageData;
+      img.onload = () => {
+        const tmp = document.createElement("canvas");
+        const tctx = tmp.getContext("2d");
+        tmp.width = img.width;
+        tmp.height = img.height;
+        tctx.drawImage(img, 0, 0);
+        const d = tctx.getImageData(0, 0, tmp.width, tmp.height);
 
-      const points = [];
-      for (let y = 0; y < tmp.height; y++) {
-        for (let x = 0; x < tmp.width; x++) {
-          const a = d.data[(y * tmp.width + x) * 4 + 3];
-          if (a > 100) points.push({ x, y });
+        const points = [];
+        for (let y = 0; y < tmp.height; y++) {
+          for (let x = 0; x < tmp.width; x++) {
+            const a = d.data[(y * tmp.width + x) * 4 + 3];
+            if (a > 100) points.push({ x, y });
+          }
         }
-      }
 
-      if (points.length < 150) return resolve(false); // ต้องมีเส้นเพียงพอ
+        // 🧩 ต้องมีเส้นเยอะพอ
+        if (points.length < 600) return resolve(false);
 
-      const xs = points.map(p => p.x);
-      const ys = points.map(p => p.y);
-      const w = Math.max(...xs) - Math.min(...xs);
-      const h = Math.max(...ys) - Math.min(...ys);
-      const ratio = w / h;
-      const density = points.length / (w * h);
+        const xs = points.map(p => p.x);
+        const ys = points.map(p => p.y);
+        const w = Math.max(...xs) - Math.min(...xs);
+        const h = Math.max(...ys) - Math.min(...ys);
+        const ratio = w / h;
+        const density = points.length / (w * h);
 
-      // ✅ เงื่อนไข "สมดุล" สำหรับรูปร่างปลา
-      // ยาวกว่าเล็กน้อย, ไม่หนาแน่นเกินไป, มีความต่อเนื่อง
-      if (ratio < 1.3 || ratio > 3.5) return resolve(false);
-      if (density < 0.02 || density > 0.25) return resolve(false);
+        // 🎯 เงื่อนไขใหม่ (คมกว่าเดิม)
+        // ต้อง "ยาวพอดี", "ไม่หนาแน่นเกิน", "เส้นต่อเนื่อง"
+        if (ratio < 1.9 || ratio > 3.3) return resolve(false);
+        if (density < 0.018 || density > 0.12) return resolve(false);
 
-      // ✅ ตรวจสอบความต่อเนื่อง (ไม่กระจายเป็นหลายก้อน)
-      const avgY = ys.reduce((a, b) => a + b, 0) / ys.length;
-      const varianceY = ys.reduce((a, b) => a + Math.pow(b - avgY, 2), 0) / ys.length;
-      const continuity = Math.sqrt(varianceY) / h;
-      if (continuity > 0.45) return resolve(false);
+        // 📏 ความต่อเนื่องแนวตั้ง (ห้ามกระจายเกิน)
+        const avgY = ys.reduce((a, b) => a + b, 0) / ys.length;
+        const varianceY = ys.reduce((a, b) => a + Math.pow(b - avgY, 2), 0) / ys.length;
+        const continuity = Math.sqrt(varianceY) / h;
+        if (continuity > 0.32) return resolve(false);
 
-      resolve(true);
-    };
-  });
-}
+        // ⚖️ สมมาตรซ้าย-ขวา (ไม่เบี้ยวเกิน)
+        const left = points.filter(p => p.x < tmp.width / 2).length;
+        const right = points.filter(p => p.x >= tmp.width / 2).length;
+        const symmetry = Math.min(left, right) / Math.max(left, right);
+        if (symmetry < 0.5) return resolve(false);
 
-  // 🐠 อัปโหลดปลา (จำกัดสูงสุด 20 ตัว)
+        resolve(true);
+      };
+    });
+  }
+
+  // 🐟 จำกัดจำนวนปลา (สูงสุด 20 ตัว)
   async function uploadFish(imageData) {
-    const { getDatabase, ref, remove, get, orderByKey, query } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js");
+    const { get, remove, orderByKey, query } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js");
     const snapshot = await get(query(dbRef, orderByKey()));
     const fishes = snapshot.exists() ? Object.entries(snapshot.val()) : [];
 
     if (fishes.length >= 20) {
       const oldestKey = fishes[0][0];
-      await remove(ref(db, `fishes/${oldestKey}`));
-      console.log("🐟 Removed oldest fish to keep limit 20");
+      await remove(window.firebaseRef(db, `fishes/${oldestKey}`));
+      console.log("🐟 Removed oldest fish to keep max 20");
     }
 
     const fishData = { image: imageData, time: Date.now() };
@@ -117,7 +159,10 @@ async function checkIfFish(imageData) {
   document.getElementById("feedBtn").addEventListener("click", async () => {
     const img = canvas.toDataURL("image/png");
     const isFish = await checkIfFish(img);
-    if (!isFish) return alert("That’s not a fish 🐱💬");
+    if (!isFish) {
+      alert("❌ That’s not a fish! Try again 🐱💬");
+      return;
+    }
     addFish(img);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     await uploadFish(img);
@@ -132,7 +177,7 @@ async function checkIfFish(imageData) {
     Object.values(data).forEach(f => addFish(f.image));
   });
 
-  // 🧭 ปุ่มไปหน้า Fish List
+  // 📜 ปุ่ม Fish List
   document.getElementById("listBtn").addEventListener("click", () => {
     window.location.href = "fishlist.html";
   });
