@@ -4,39 +4,16 @@
   let drawing = false;
   let currentColor = "#000000";
 
-  // 🎨 ระบบวาด
-  canvas.addEventListener("mousedown", (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
-  canvas.addEventListener("mousemove", (e) => {
-    if (!drawing) return;
-    ctx.lineTo(e.offsetX, e.offsetY);
-    ctx.strokeStyle = currentColor;
-    ctx.lineWidth = 6;
-    ctx.lineCap = "round";
-    ctx.stroke();
-  });
+  const db = window.db;
+  const dbRef = window.firebaseRef(db, "fishes");
+
+  // วาด
+  canvas.addEventListener("mousedown", e => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+  canvas.addEventListener("mousemove", e => { if (drawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.strokeStyle = currentColor; ctx.lineWidth = 6; ctx.lineCap = "round"; ctx.stroke(); }});
   canvas.addEventListener("mouseup", () => drawing = false);
   canvas.addEventListener("mouseleave", () => drawing = false);
-
-  // 📱 รองรับมือถือ
-  canvas.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    const rect = canvas.getBoundingClientRect();
-    const t = e.touches[0];
-    drawing = true;
-    ctx.beginPath();
-    ctx.moveTo(t.clientX - rect.left, t.clientY - rect.top);
-  });
-  canvas.addEventListener("touchmove", (e) => {
-    e.preventDefault();
-    if (!drawing) return;
-    const rect = canvas.getBoundingClientRect();
-    const t = e.touches[0];
-    ctx.lineTo(t.clientX - rect.left, t.clientY - rect.top);
-    ctx.strokeStyle = currentColor;
-    ctx.lineWidth = 6;
-    ctx.lineCap = "round";
-    ctx.stroke();
-  });
+  canvas.addEventListener("touchstart", e => { e.preventDefault(); const r = canvas.getBoundingClientRect(); const t = e.touches[0]; drawing = true; ctx.beginPath(); ctx.moveTo(t.clientX - r.left, t.clientY - r.top); });
+  canvas.addEventListener("touchmove", e => { e.preventDefault(); if (!drawing) return; const r = canvas.getBoundingClientRect(); const t = e.touches[0]; ctx.lineTo(t.clientX - r.left, t.clientY - r.top); ctx.strokeStyle = currentColor; ctx.lineWidth = 6; ctx.lineCap = "round"; ctx.stroke(); });
   canvas.addEventListener("touchend", () => drawing = false);
 
   document.querySelectorAll(".color-btn").forEach(btn => {
@@ -49,7 +26,32 @@
 
   document.getElementById("clearBtn").addEventListener("click", () => ctx.clearRect(0, 0, canvas.width, canvas.height));
 
-  // 🧠 ตรวจว่ารูปคล้ายปลา (ระดับพอดี)
+  const fishContainer = document.getElementById("fishContainer");
+
+  // 🐟 เพิ่มปลาในตู้
+  function addFish(image) {
+    const fish = document.createElement("img");
+    fish.src = image;
+    fish.classList.add("fish");
+    fish.style.top = 50 + Math.random() * 45 + "%";
+    fish.style.left = 10 + Math.random() * 70 + "%";
+    fishContainer.appendChild(fish);
+
+    const swim = () => {
+      const randomX = 10 + Math.random() * 80;
+      const randomY = 50 + Math.random() * 45;
+      const duration = 7000 + Math.random() * 4000;
+      const flip = Math.random() < 0.5 ? "scaleX(1)" : "scaleX(-1)";
+      fish.style.transition = `top ${duration}ms ease-in-out, left ${duration}ms ease-in-out, transform 1s ease`;
+      fish.style.top = `${randomY}%`;
+      fish.style.left = `${randomX}%`;
+      fish.style.transform = flip;
+      setTimeout(swim, duration);
+    };
+    setTimeout(swim, 1000);
+  }
+
+  // 🧠 ตรวจว่าคล้ายปลา
   async function checkIfFish(imageData) {
     return new Promise(resolve => {
       const img = new Image();
@@ -61,96 +63,50 @@
         tmp.height = img.height;
         tctx.drawImage(img, 0, 0);
         const d = tctx.getImageData(0, 0, tmp.width, tmp.height);
-        const points = [];
-        for (let y = 0; y < tmp.height; y++) {
-          for (let x = 0; x < tmp.width; x++) {
-            const a = d.data[(y * tmp.width + x) * 4 + 3];
-            if (a > 100) points.push({ x, y });
-          }
-        }
-        if (points.length < 150) return resolve(false);
-        const xs = points.map(p => p.x);
-        const ys = points.map(p => p.y);
-        const ratio = (Math.max(...xs) - Math.min(...xs)) / (Math.max(...ys) - Math.min(...ys));
-        resolve(ratio > 1.2 && ratio < 3.8);
+        let count = 0;
+        for (let i = 3; i < d.data.length; i += 4) if (d.data[i] > 100) count++;
+        resolve(count > 150);
       };
     });
   }
 
-  // 🌊 ส่วนจัดการปลาในจอ
-  const fishContainer = document.getElementById("fishContainer");
+  // 🐠 อัปโหลดปลา (จำกัดสูงสุด 20 ตัว)
+  async function uploadFish(imageData) {
+    const { getDatabase, ref, remove, get, orderByKey, query } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js");
+    const snapshot = await get(query(dbRef, orderByKey()));
+    const fishes = snapshot.exists() ? Object.entries(snapshot.val()) : [];
 
-  function addFishToAquarium(imageData) {
-    const fish = document.createElement("img");
-    fish.src = imageData;
-    fish.classList.add("fish");
-    fish.style.top = 50 + Math.random() * 45 + "%";
-    fish.style.left = 10 + Math.random() * 70 + "%";
-    fishContainer.appendChild(fish);
-
-    function swim() {
-      const randomX = 10 + Math.random() * 80;
-      const randomY = 50 + Math.random() * 45;
-      const duration = 7000 + Math.random() * 4000;
-      const flip = Math.random() < 0.5 ? "scaleX(1)" : "scaleX(-1)";
-      fish.style.transition = `top ${duration}ms ease-in-out, left ${duration}ms ease-in-out, transform 1s ease`;
-      fish.style.top = `${randomY}%`;
-      fish.style.left = `${randomX}%`;
-      fish.style.transform = flip;
-      setTimeout(swim, duration);
+    if (fishes.length >= 20) {
+      const oldestKey = fishes[0][0];
+      await remove(ref(db, `fishes/${oldestKey}`));
+      console.log("🐟 Removed oldest fish to keep limit 20");
     }
 
-    // 🩵 แตะแล้วว่ายเร็วขึ้น
-    fish.addEventListener("click", () => {
-      fish.style.transition = `top 2000ms ease-in-out, left 2000ms ease-in-out, transform 0.5s ease`;
-      const randomX = 10 + Math.random() * 80;
-      const randomY = 50 + Math.random() * 45;
-      fish.style.top = `${randomY}%`;
-      fish.style.left = `${randomX}%`;
-      setTimeout(() => fish.style.transition = "top 8s ease-in-out, left 8s ease-in-out, transform 1s ease", 2000);
-    });
-
-    setTimeout(swim, 1000 + Math.random() * 2000);
+    const fishData = { image: imageData, time: Date.now() };
+    await window.firebasePush(dbRef, fishData);
   }
 
-  // 🌍 เชื่อมต่อ Firebase (Public Aquarium)
-  if (window.db) {
-    console.log("✅ Firebase connected successfully");
-    const db = window.db;
-    const dbRef = window.firebaseRef(db, "fishes");
+  // 🍽️ Feed ปลาขึ้น Firebase
+  document.getElementById("feedBtn").addEventListener("click", async () => {
+    const img = canvas.toDataURL("image/png");
+    const isFish = await checkIfFish(img);
+    if (!isFish) return alert("That’s not a fish 🐱💬");
+    addFish(img);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    await uploadFish(img);
+  });
 
-    // 🐟 อัปโหลดปลา
-    async function uploadFish(imageData) {
-      try {
-        const fishData = { image: imageData, time: Date.now(), user: navigator.userAgent };
-        await window.firebasePush(dbRef, fishData);
-        console.log("✅ Fish uploaded successfully");
-      } catch (err) {
-        console.error("❌ Upload failed:", err);
-      }
-    }
+  // 🪸 โหลดปลา realtime
+  const queryRef = window.firebaseQuery(dbRef, window.firebaseLimit(20));
+  window.firebaseOnValue(queryRef, snapshot => {
+    const data = snapshot.val();
+    fishContainer.innerHTML = "";
+    if (!data) return;
+    Object.values(data).forEach(f => addFish(f.image));
+  });
 
-    // 🐠 โหลดปลาทั้งหมดแบบ realtime
-    const queryRef = window.firebaseQuery(dbRef, window.firebaseLimit(30));
-    window.firebaseOnValue(queryRef, (snapshot) => {
-      const data = snapshot.val();
-      fishContainer.innerHTML = "";
-      if (!data) return;
-      Object.values(data).forEach(f => addFishToAquarium(f.image));
-      console.log("🐟 Loaded", Object.keys(data).length, "fish from Firebase");
-    });
-
-    // 🍽️ ปุ่ม Feed (อัปโหลดปลา)
-    document.getElementById("feedBtn").addEventListener("click", async () => {
-      const img = canvas.toDataURL("image/png");
-      const isFish = await checkIfFish(img);
-      if (!isFish) {
-        alert("That’s not a fish 🐱💬");
-        return;
-      }
-      addFishToAquarium(img);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      await uploadFish(img); // ✅ แชร์ขึ้นฐานข้อมูลให้คนอื่นเห็น
-    });
-  }
+  // 🧭 ปุ่มไปหน้า Fish List
+  document.getElementById("listBtn").addEventListener("click", () => {
+    window.location.href = "fishlist.html";
+  });
 })();
