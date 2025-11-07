@@ -126,5 +126,14 @@ button:hover { background: #99d6ff; }
   70% { transform: scale(1.4); opacity: 1; }
   100% { transform: scale(0); opacity: 0; }
 }
+/* 🎨 Canvas Drawing Area */
+#drawCanvas {
+  background-color: #eaf6ff;
+  border: 2px dashed #add8e6;
+  border-radius: 10px;
+  touch-action: none; /* 📱 ป้องกันมือถือซูม/เลื่อนขณะวาด */
+  box-shadow: 0 0 8px rgba(173, 216, 230, 0.4);
+  cursor: crosshair;
+}
 
 footer { margin: 30px 0; font-size: .9rem; color: #888; }
