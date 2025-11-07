@@ -111,6 +111,63 @@ async function checkIfFish(imageData) {
   const fishContainer = document.getElementById("fishContainer");
  // 🐟 เพิ่มปลาในตู้ (ว่ายไป-ว่ายมาในพื้นที่ของตัวเอง)
 function addFishToAquarium(imageData) {
+  function addFishToAquarium(imageData) {
+  const fish = document.createElement("img");
+  fish.src = imageData;
+  fish.classList.add("fish");
+  fish.style.position = "absolute";
+  fish.style.width = 80 + Math.random() * 60 + "px";
+  fish.style.top = 50 + Math.random() * 45 + "%"; // 🐟 ครึ่งล่างของจอ
+  fish.style.left = 10 + Math.random() * 70 + "%";
+  fish.style.opacity = 0.9;
+  fish.style.transition = "top 8s ease-in-out, left 8s ease-in-out, transform 1s ease";
+  fishContainer.appendChild(fish);
+
+  // 🐠 ฟังก์ชันว่ายแบบสุ่มตำแหน่ง
+  function swim() {
+    const randomX = 10 + Math.random() * 80;
+    const randomY = 50 + Math.random() * 45;
+    const duration = 7000 + Math.random() * 5000;
+    const flip = Math.random() < 0.5 ? "scaleX(1)" : "scaleX(-1)";
+
+    fish.style.transition = `top ${duration}ms ease-in-out, left ${duration}ms ease-in-out, transform 1s ease`;
+    fish.style.top = `${randomY}%`;
+    fish.style.left = `${randomX}%`;
+    fish.style.transform = flip;
+
+    setTimeout(swim, duration);
+  }
+
+  // 🩵 แตะแล้วว่ายเร็วขึ้น
+  function speedBoost() {
+    // ลด transition duration เหลือ 2 วินาที
+    fish.style.transition = `top 2000ms ease-in-out, left 2000ms ease-in-out, transform 0.6s ease`;
+
+    // สั่งให้มันเคลื่อนตำแหน่งใหม่ทันที (เหมือนเร่งตัว)
+    const randomX = 10 + Math.random() * 80;
+    const randomY = 50 + Math.random() * 45;
+    const flip = Math.random() < 0.5 ? "scaleX(1)" : "scaleX(-1)";
+    fish.style.top = `${randomY}%`;
+    fish.style.left = `${randomX}%`;
+    fish.style.transform = flip;
+
+    // 🕒 กลับไปว่ายปกติหลังจาก 2 วินาที
+    setTimeout(() => {
+      fish.style.transition = "top 8s ease-in-out, left 8s ease-in-out, transform 1s ease";
+    }, 2000);
+  }
+
+  // 🧲 เพิ่ม event ให้ปลาแต่ละตัว
+  fish.addEventListener("click", speedBoost);
+  fish.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    speedBoost();
+  });
+
+  // 🏊 เริ่มว่าย
+  setTimeout(swim, 1000 + Math.random() * 2000);
+}
+
   const fish = document.createElement("img");
   fish.src = imageData;
   fish.classList.add("fish");
