@@ -86,7 +86,7 @@
     setTimeout(swim, 1000);
   }
 
-// 🧠 ตรวจว่ารูปคล้ายปลา (Mobile-Friendly Mode: ปานกลาง)
+// 🧠 ตรวจว่ารูปคล้ายปลา (Easy+ Mode)
 async function checkIfFish(imageData) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -107,8 +107,8 @@ async function checkIfFish(imageData) {
         }
       }
 
-      // 🎯 ต้องวาดพอมีรูปทรง (แต่ไม่ต้องเยอะเกิน)
-      if (points.length < 300) return resolve(false);
+      // 🎯 ต้องวาดพอมีรูปทรง (แต่ไม่ต้องเยอะ)
+      if (points.length < 200) return resolve(false);
 
       const xs = points.map(p => p.x);
       const ys = points.map(p => p.y);
@@ -117,21 +117,21 @@ async function checkIfFish(imageData) {
       const ratio = w / h;
       const density = points.length / (w * h);
 
-      // 🐟 เงื่อนไขที่ผ่อนลงเล็กน้อย
-      if (ratio < 1.4 || ratio > 3.6) return resolve(false); // ยาวพอสมควร
-      if (density < 0.015 || density > 0.20) return resolve(false); // ความหนาแน่นสมดุล
+      // 🐟 เงื่อนไขผ่อนลง (เหมาะกับจอมือถือ)
+      if (ratio < 1.2 || ratio > 4.0) return resolve(false); // ยาวได้ หรือตัวสั้นนิดก็ได้
+      if (density < 0.012 || density > 0.25) return resolve(false); // เส้นบางหรือหนานิดได้
 
-      // 📏 ความต่อเนื่องแนวตั้ง (ลดความเข้มงวด)
+      // 📏 ความต่อเนื่องแบบสบาย ๆ
       const avgY = ys.reduce((a, b) => a + b, 0) / ys.length;
       const varianceY = ys.reduce((a, b) => a + Math.pow(b - avgY, 2), 0) / ys.length;
       const continuity = Math.sqrt(varianceY) / h;
-      if (continuity > 0.4) return resolve(false);
+      if (continuity > 0.5) return resolve(false);
 
-      // ⚖️ สมมาตร (ไม่ต้องเท่ากันเป๊ะ)
+      // ⚖️ สมมาตร (ลดเกณฑ์ลงอีก)
       const left = points.filter(p => p.x < tmp.width / 2).length;
       const right = points.filter(p => p.x >= tmp.width / 2).length;
       const symmetry = Math.min(left, right) / Math.max(left, right);
-      if (symmetry < 0.4) return resolve(false);
+      if (symmetry < 0.35) return resolve(false);
 
       resolve(true);
     };
