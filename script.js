@@ -109,33 +109,40 @@ async function checkIfFish(imageData) {
 }
 
   const fishContainer = document.getElementById("fishContainer");
- // 🐟 เพิ่มปลาในตู้ (ว่ายจากขวา → ซ้าย)
+ // 🐟 เพิ่มปลาในตู้ (ว่ายไป-ว่ายมาในพื้นที่ของตัวเอง)
 function addFishToAquarium(imageData) {
   const fish = document.createElement("img");
   fish.src = imageData;
   fish.classList.add("fish");
   fish.style.position = "absolute";
-  fish.style.width = "120px";
-  fish.style.top = 60 + Math.random() * 25 + "%";
-  fish.style.left = "110%"; // เริ่มนอกจอด้านขวา
-  fish.style.transform = "scaleX(-1)"; // หันไปทางซ้าย
-
+  fish.style.width = 80 + Math.random() * 60 + "px"; // ขนาดต่างกัน
+  fish.style.top = 40 + Math.random() * 40 + "%"; // กระจายตำแหน่งแนวตั้ง
+  fish.style.left = 10 + Math.random() * 70 + "%"; // เริ่มตรงไหนก็ได้
+  fish.style.opacity = 0.9;
+  fish.style.transition = "transform 1s linear";
   fishContainer.appendChild(fish);
 
-  // 🩵 ให้ปลาค่อย ๆ ว่ายข้ามจอแบบสมจริง
-  const duration = 10000 + Math.random() * 6000; // 10–16 วินาที
-  fish.animate(
-    [
-      { transform: "translateX(0) scaleX(-1)", left: "110%" },
-      { transform: "translateX(-120vw) scaleX(-1)", left: "-20%" }
-    ],
-    {
-      duration: duration,
-      iterations: Infinity,
-      easing: "linear"
-    }
-  );
+  // 🐠 ฟังก์ชันว่ายไปมาแบบสุ่ม
+  function swim() {
+    const randomX = 10 + Math.random() * 80; // %
+    const randomY = 40 + Math.random() * 40; // %
+    const duration = 6000 + Math.random() * 4000; // 6–10 วินาที
+    const flip = Math.random() < 0.5 ? "scaleX(1)" : "scaleX(-1)";
+
+    // ใช้ CSS transition เดินทางอย่างลื่น
+    fish.style.transition = `top ${duration}ms ease-in-out, left ${duration}ms ease-in-out, transform 1s ease`;
+    fish.style.top = `${randomY}%`;
+    fish.style.left = `${randomX}%`;
+    fish.style.transform = flip;
+
+    // สั่งให้มันว่ายต่อเนื่อง
+    setTimeout(swim, duration);
+  }
+
+  // เริ่มว่ายหลังเพิ่มลง DOM
+  setTimeout(swim, 1000 + Math.random() * 2000);
 }
+
 
   function showReaction(text) {
     const el = document.getElementById("reactionText");
