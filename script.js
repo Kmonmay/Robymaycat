@@ -212,6 +212,7 @@ if (window.db) {
   });
 
   // ✅ Make sure Feed button can use upload function
+  console.log("🔥 Trying to upload fish to path:", dbRef.toString());
   window.saveFish = uploadFish;
 }
 
