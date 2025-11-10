@@ -86,59 +86,57 @@
     setTimeout(swim, 1000);
   }
 
-// 🧠 ตรวจว่ารูปคล้ายปลา (Super Easy Mode)
-async function checkIfFish(imageData) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.src = imageData;
-    img.onload = () => {
-      const tmp = document.createElement("canvas");
-      const tctx = tmp.getContext("2d");
-      tmp.width = img.width;
-      tmp.height = img.height;
-      tctx.drawImage(img, 0, 0);
-      const d = tctx.getImageData(0, 0, tmp.width, tmp.height);
+  // 🧠 ตรวจว่ารูปคล้ายปลา (Super Easy Mode)
+  async function checkIfFish(imageData) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = imageData;
+      img.onload = () => {
+        const tmp = document.createElement("canvas");
+        const tctx = tmp.getContext("2d");
+        tmp.width = img.width;
+        tmp.height = img.height;
+        tctx.drawImage(img, 0, 0);
+        const d = tctx.getImageData(0, 0, tmp.width, tmp.height);
 
-      const points = [];
-      for (let y = 0; y < tmp.height; y++) {
-        for (let x = 0; x < tmp.width; x++) {
-          const a = d.data[(y * tmp.width + x) * 4 + 3];
-          if (a > 100) points.push({ x, y });
+        const points = [];
+        for (let y = 0; y < tmp.height; y++) {
+          for (let x = 0; x < tmp.width; x++) {
+            const a = d.data[(y * tmp.width + x) * 4 + 3];
+            if (a > 100) points.push({ x, y });
+          }
         }
-      }
 
-      // 🐟 เงื่อนไขง่ายมาก
-      if (points.length < 120) return resolve(false); // แค่มีเส้นพอประมาณก็ผ่าน
+        if (points.length < 120) return resolve(false);
 
-      const xs = points.map(p => p.x);
-      const ys = points.map(p => p.y);
-      const w = Math.max(...xs) - Math.min(...xs);
-      const h = Math.max(...ys) - Math.min(...ys);
-      const ratio = w / h || 1;
-      const density = points.length / (w * h);
+        const xs = points.map(p => p.x);
+        const ys = points.map(p => p.y);
+        const w = Math.max(...xs) - Math.min(...xs);
+        const h = Math.max(...ys) - Math.min(...ys);
+        const ratio = w / h || 1;
+        const density = points.length / (w * h);
 
-      // 🎯 เกณฑ์ผ่อนคลายสุด ๆ
-      if (ratio < 1.0 || ratio > 5.0) return resolve(false); // ยาวหรือสั้นได้เกือบหมด
-      if (density < 0.008 || density > 0.35) return resolve(false); // หนา บางก็ได้หมด
+        if (ratio < 1.0 || ratio > 5.0) return resolve(false);
+        if (density < 0.008 || density > 0.35) return resolve(false);
 
-      // 📏 ความต่อเนื่อง (อนุโลมสุด)
-      const avgY = ys.reduce((a, b) => a + b, 0) / ys.length;
-      const varianceY = ys.reduce((a, b) => a + Math.pow(b - avgY, 2), 0) / ys.length;
-      const continuity = Math.sqrt(varianceY) / (h || 1);
-      if (continuity > 0.6) return resolve(false); // เส้นขาด ๆ ก็พอได้
+        const avgY = ys.reduce((a, b) => a + b, 0) / ys.length;
+        const varianceY = ys.reduce((a, b) => a + Math.pow(b - avgY, 2), 0) / ys.length;
+        const continuity = Math.sqrt(varianceY) / (h || 1);
+        if (continuity > 0.6) return resolve(false);
 
-      resolve(true);
-    };
-  });
-}
+        resolve(true);
+      };
+    });
+  }
 
-
-  // 🐟 จำกัดจำนวนปลา (สูงสุด 20 ตัว)
+  // 🐟 จำกัดจำนวนปลาในตู้ + บันทึกประวัติทั้งหมด
   async function uploadFish(imageData) {
-    const { get, remove, orderByKey, query } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js");
+    const { get, remove, orderByKey, query } =
+      await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js");
     const snapshot = await get(query(dbRef, orderByKey()));
     const fishes = snapshot.exists() ? Object.entries(snapshot.val()) : [];
 
+    // ถ้ามีเกิน 20 ตัวให้ลบตัวเก่าสุด
     if (fishes.length >= 20) {
       const oldestKey = fishes[0][0];
       await remove(window.firebaseRef(db, `fishes/${oldestKey}`));
@@ -147,6 +145,10 @@ async function checkIfFish(imageData) {
 
     const fishData = { image: imageData, time: Date.now() };
     await window.firebasePush(dbRef, fishData);
+
+    // 📜 บันทึกประวัติทั้งหมด (ไม่ลบ)
+    const historyRef = window.firebaseRef(db, "fishHistory");
+    await window.firebasePush(historyRef, fishData);
   }
 
   // 🍽️ Feed ปลาขึ้น Firebase
