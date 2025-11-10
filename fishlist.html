@@ -2,54 +2,92 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Fish List - Robymaycat Aquarium</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Fishes - Robymaycat</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: linear-gradient(to bottom, #e8f7ff, #ffffff);
+      text-align: center;
+      font-family: "Cooper Black", sans-serif;
+      color: #333;
+    }
+    h1 {
+      color: #4da6ff;
+      margin-top: 30px;
+    }
+    .fish-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      margin: 30px auto;
+      max-width: 800px;
+    }
+    .fish-gallery img {
+      width: 120px;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+      transition: transform 0.3s;
+    }
+    .fish-gallery img:hover {
+      transform: scale(1.1);
+    }
+    .back-btn {
+      background: #b3e5fc;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-bottom: 40px;
+    }
+    .back-btn:hover {
+      background: #81d4fa;
+      transform: scale(1.05);
+    }
+  </style>
 </head>
-
 <body>
-  <header>
-    <h1>🐠 Fish List</h1>
-    <p class="subtitle">All fish everyone has drawn</p>
-  </header>
+  <h1>🐟 All Fishes Ever Fed</h1>
+  <p style="color:#666;">(Every fish ever drawn by users 🫧)</p>
 
-  <main>
-    <div id="fishGallery" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;"></div>
-    <button id="backBtn" style="margin-top:30px;">⬅️ Back</button>
-  </main>
+  <div class="fish-gallery" id="fishGallery"></div>
+  <button class="back-btn" id="backBtn">⬅️ Back to Aquarium</button>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-    const app = initializeApp({
+    const firebaseConfig = {
       apiKey: "AIzaSyDwJ__tUXNhDhuyfEH4nxf1DoiAeiMA20o",
       authDomain: "robymaycat.firebaseapp.com",
       databaseURL: "https://robymaycat-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "robymaycat"
-    });
+      projectId: "robymaycat",
+      storageBucket: "robymaycat.appspot.com",
+      messagingSenderId: "902678070279",
+      appId: "1:902678070279:web:c3f054e2b43ec0b7c916a2"
+    };
 
+    const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const fishGallery = document.getElementById("fishGallery");
 
-    async function loadFishList() {
-      const snapshot = await get(ref(db, "fishes"));
-      if (!snapshot.exists()) {
-        fishGallery.innerHTML = "<p>No fish yet 🐾</p>";
-        return;
-      }
-      const fishes = Object.values(snapshot.val()).reverse(); // เรียงล่าสุดก่อน
+    const dbRef = ref(db, "fishHistory");
+    const gallery = document.getElementById("fishGallery");
+
+    onValue(dbRef, snapshot => {
+      gallery.innerHTML = "";
+      const data = snapshot.val();
+      if (!data) return;
+      const fishes = Object.values(data).reverse();
       fishes.forEach(f => {
         const img = document.createElement("img");
         img.src = f.image;
-        img.style.width = "120px";
-        img.style.borderRadius = "8px";
-        img.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
-        fishGallery.appendChild(img);
+        gallery.appendChild(img);
       });
-    }
-    loadFishList();
+    });
 
     document.getElementById("backBtn").addEventListener("click", () => {
       window.location.href = "index.html";
